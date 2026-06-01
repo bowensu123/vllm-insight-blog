@@ -8,10 +8,13 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (206)
+## PRs merged this window (209)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44246](https://github.com/vllm-project/vllm/pull/44246) [DSV4] Remove unncessary classes & functions — @WoosukKwon → `nan`
+- [#44234](https://github.com/vllm-project/vllm/pull/44234) [Test][BugFix] Fix double-BOS in PD+specdec acceptance test — @njhill → `nan`
+- [#44248](https://github.com/vllm-project/vllm/pull/44248) [BugFix][CI] Fix added `_has_module` tests — @njhill → `nan`
 - [#40096](https://github.com/vllm-project/vllm/pull/40096) [Frontend][Core] Add sparse NCCL weight transfer support for in-place updates — @bedeks → `nan`
 - [#43779](https://github.com/vllm-project/vllm/pull/43779) [Rust Frontend] Support streaming `generate` endpoint — @Xunzhuo → `nan`
 - [#41294](https://github.com/vllm-project/vllm/pull/41294) [ROCm][CI] Fix and stabilize EAGLE3 acceptance tests — @AndreasKaratzas → `nan`
@@ -69,9 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#42595](https://github.com/vllm-project/vllm/pull/42595) [Bugfix] [ROCm] [DSV4] Fix AITER MXFP4 MoE weight loading and shuffle… — @MHYangAMD → `nan`
 - [#41394](https://github.com/vllm-project/vllm/pull/41394) [Kernel][ROCm] Native W4A16 kernel for AMD RDNA3 (gfx1100) — fp16 + bf16 — @JartX → `nan`
 - [#37622](https://github.com/vllm-project/vllm/pull/37622) [Bugfix] Fix Step3 pipeline parallel KeyError for residual tensor — @JMonde → `v0.22.0`
-- [#43871](https://github.com/vllm-project/vllm/pull/43871) [CI] Nixl+SimpleCPUOffloadingConnector unit tests — @NickLucche → `v0.22.0`
-- [#43565](https://github.com/vllm-project/vllm/pull/43565) [XPU] support MTP of gdn attention — @mayuyuace → `v0.22.0`
-- [#43703](https://github.com/vllm-project/vllm/pull/43703) [CI][ROCm] Don't skip MoRI-IO Connector tests — @simondanielsson → `v0.22.0`
-- _…and 146 more_
+- _…and 149 more_
 
 </details>
