@@ -12,6 +12,14 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#43481](https://github.com/vllm-project/vllm/pull/43481) [Rust Frontend] Add InternLM2 tool parser — @willamhou → `nan`
+- [#44153](https://github.com/vllm-project/vllm/pull/44153) [Frontend] Resettle generative scoring entrypoint. — @noooop → `nan`
+- [#42944](https://github.com/vllm-project/vllm/pull/42944) fix: glm5.1 pp model loading — @UranusSeven → `nan`
+- [#42730](https://github.com/vllm-project/vllm/pull/42730) [CPU][RISC-V] Add missing RVV cpu_types helpers for WNA16 — @wcynb1023 → `nan`
+- [#44159](https://github.com/vllm-project/vllm/pull/44159) [Docs] Replace broken video url in examples — @Isotr0py → `nan`
+- [#44035](https://github.com/vllm-project/vllm/pull/44035) [BugFix] Fix `_has_module` to verify native deps via trial import — @jeffreywang-anyscale → `nan`
+- [#44078](https://github.com/vllm-project/vllm/pull/44078) [MRV2] Remove Eagle's dedicated CUDA graph pool — @LucasWilkinson → `nan`
+- [#36254](https://github.com/vllm-project/vllm/pull/36254) [Misc] Use VLLMValidationError consistently in chat completion and completion protocol validators — @umut-polat → `nan`
 - [#44118](https://github.com/vllm-project/vllm/pull/44118) docs: fix MLA attention docstring examples — @nightcityblade → `nan`
 - [#43956](https://github.com/vllm-project/vllm/pull/43956) [CI/Build] Enable Step3p7ForConditionalGeneration testing — @jeejeelee → `nan`
 - [#41813](https://github.com/vllm-project/vllm/pull/41813) [CPU][Zen] Route W8A8 and W4A16 linear inference through zentorch on AMD Zen CPUs — @aadwived → `nan`
@@ -64,14 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#42822](https://github.com/vllm-project/vllm/pull/42822) add gelu_tanh to xpu moe backend supported activations — @yintong-lu → `v0.22.0`
 - [#43712](https://github.com/vllm-project/vllm/pull/43712) [CI] Separate non-root smoke tests from image build step — @khluu → `v0.22.0`
 - [#43717](https://github.com/vllm-project/vllm/pull/43717) [9/n] Migrate attention and cache kernels to torch stable ABI (continued)  — @cleonard530 → `v0.22.0`
-- [#43234](https://github.com/vllm-project/vllm/pull/43234) [Refactor] Remove dead code — @yewentao256 → `v0.22.0`
-- [#43797](https://github.com/vllm-project/vllm/pull/43797) [kv_offload] Skip decode-phase blocks in CPU offload — @Etelis → `v0.22.0`
-- [#43277](https://github.com/vllm-project/vllm/pull/43277) [XPU] add scale transpose to prepare_fp8_moe_layer_for_xpu and bump up kernels — @mayuyuace → `v0.22.0`
-- [#42288](https://github.com/vllm-project/vllm/pull/42288) Adjust design around encoder_cudagraph_forward — @wdhongtw → `v0.22.0`
-- [#43575](https://github.com/vllm-project/vllm/pull/43575) [feat] add GlmgaProcessor specific logits in `glm4_1v.py` — @JaredforReal → `v0.22.0`
-- [#43905](https://github.com/vllm-project/vllm/pull/43905) [DSv4] Move mHC tilelang kernels & Don't use CustomOP in dsv4/nvidia — @WoosukKwon → `v0.22.0`
-- [#43270](https://github.com/vllm-project/vllm/pull/43270) [Misc][NUMA] Auto-bind to PCT priority cores on DGX B300 + widen EngineCore across shard NUMA nodes — @vadiklyutiy → `v0.22.0`
-- [#43854](https://github.com/vllm-project/vllm/pull/43854) [Rust Frontend] Add `/version` endpoint using engine-reported value — @BugenZhao → `v0.22.0`
 - _…and 139 more_
 
 </details>
