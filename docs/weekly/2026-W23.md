@@ -8,10 +8,14 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (202)
+## PRs merged this window (206)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#40096](https://github.com/vllm-project/vllm/pull/40096) [Frontend][Core] Add sparse NCCL weight transfer support for in-place updates — @bedeks → `nan`
+- [#43779](https://github.com/vllm-project/vllm/pull/43779) [Rust Frontend] Support streaming `generate` endpoint — @Xunzhuo → `nan`
+- [#41294](https://github.com/vllm-project/vllm/pull/41294) [ROCm][CI] Fix and stabilize EAGLE3 acceptance tests — @AndreasKaratzas → `nan`
+- [#44161](https://github.com/vllm-project/vllm/pull/44161) [Kernel][DSv4] Optimize sparse FP8 compressor kernels — @zyongye → `nan`
 - [#43992](https://github.com/vllm-project/vllm/pull/43992) [Feature] Add support for JetBrains' Mellum v2 code generation model — @shadeMe → `nan`
 - [#43706](https://github.com/vllm-project/vllm/pull/43706) [Perf] Optimize cutlass fp8 scaled mm bypassing padding, 20% kernel performance improvement — @yewentao256 → `nan`
 - [#44146](https://github.com/vllm-project/vllm/pull/44146) [XPU][CI] Fix test_audio_in_video flake by using module-scoped server fixture — @chaojun-zhang → `nan`
@@ -68,10 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43871](https://github.com/vllm-project/vllm/pull/43871) [CI] Nixl+SimpleCPUOffloadingConnector unit tests — @NickLucche → `v0.22.0`
 - [#43565](https://github.com/vllm-project/vllm/pull/43565) [XPU] support MTP of gdn attention — @mayuyuace → `v0.22.0`
 - [#43703](https://github.com/vllm-project/vllm/pull/43703) [CI][ROCm] Don't skip MoRI-IO Connector tests — @simondanielsson → `v0.22.0`
-- [#43947](https://github.com/vllm-project/vllm/pull/43947) [XPU] fix xpu install document triton-xpu version — @jikunshang → `v0.22.0`
-- [#43945](https://github.com/vllm-project/vllm/pull/43945) [ROCm][CI] Fix AITER unified attention for encoder-decoder cross-attention — @AndreasKaratzas → `v0.22.0`
-- [#43761](https://github.com/vllm-project/vllm/pull/43761) [Frontend]Responses API supports chat_template_kwargs — @chaunceyjiang → `v0.22.0`
-- [#43898](https://github.com/vllm-project/vllm/pull/43898) [ROCm][DSv4] Remove device pipeline stall in sparse attention — @kliuae → `v0.22.0`
-- _…and 142 more_
+- _…and 146 more_
 
 </details>
