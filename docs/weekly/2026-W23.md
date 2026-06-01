@@ -8,10 +8,14 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (199)
+## PRs merged this window (202)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#43992](https://github.com/vllm-project/vllm/pull/43992) [Feature] Add support for JetBrains' Mellum v2 code generation model — @shadeMe → `nan`
+- [#43706](https://github.com/vllm-project/vllm/pull/43706) [Perf] Optimize cutlass fp8 scaled mm bypassing padding, 20% kernel performance improvement — @yewentao256 → `nan`
+- [#44146](https://github.com/vllm-project/vllm/pull/44146) [XPU][CI] Fix test_audio_in_video flake by using module-scoped server fixture — @chaojun-zhang → `nan`
+- [#43770](https://github.com/vllm-project/vllm/pull/43770) [Bugfix] fix wrong partial_rotary_factor calculation for bailing_moe model. — @zzt93 → `nan`
 - [#43481](https://github.com/vllm-project/vllm/pull/43481) [Rust Frontend] Add InternLM2 tool parser — @willamhou → `nan`
 - [#44153](https://github.com/vllm-project/vllm/pull/44153) [Frontend] Resettle generative scoring entrypoint. — @noooop → `nan`
 - [#42944](https://github.com/vllm-project/vllm/pull/42944) fix: glm5.1 pp model loading — @UranusSeven → `nan`
@@ -68,10 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43945](https://github.com/vllm-project/vllm/pull/43945) [ROCm][CI] Fix AITER unified attention for encoder-decoder cross-attention — @AndreasKaratzas → `v0.22.0`
 - [#43761](https://github.com/vllm-project/vllm/pull/43761) [Frontend]Responses API supports chat_template_kwargs — @chaunceyjiang → `v0.22.0`
 - [#43898](https://github.com/vllm-project/vllm/pull/43898) [ROCm][DSv4] Remove device pipeline stall in sparse attention — @kliuae → `v0.22.0`
-- [#43633](https://github.com/vllm-project/vllm/pull/43633) [CPU Backend] CPU top-k and top-p sampling kernels using Triton — @tianmu-li → `v0.22.0`
-- [#42822](https://github.com/vllm-project/vllm/pull/42822) add gelu_tanh to xpu moe backend supported activations — @yintong-lu → `v0.22.0`
-- [#43712](https://github.com/vllm-project/vllm/pull/43712) [CI] Separate non-root smoke tests from image build step — @khluu → `v0.22.0`
-- [#43717](https://github.com/vllm-project/vllm/pull/43717) [9/n] Migrate attention and cache kernels to torch stable ABI (continued)  — @cleonard530 → `v0.22.0`
-- _…and 139 more_
+- _…and 142 more_
 
 </details>
