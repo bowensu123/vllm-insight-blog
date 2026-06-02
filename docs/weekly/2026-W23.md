@@ -8,10 +8,13 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (229)
+## PRs merged this window (232)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#43332](https://github.com/vllm-project/vllm/pull/43332) [MoE/b12x] Accept W4A16 (kNvfp4Static, None) in FlashInferB12xExperts supports check — @ECMGit → `nan`
+- [#44036](https://github.com/vllm-project/vllm/pull/44036) [CI/Build] Bump flashinfer to v0.6.12 — @vadiklyutiy → `nan`
+- [#44345](https://github.com/vllm-project/vllm/pull/44345) [BugFix] Fix sparse NCCL weight transfer test construction — @bedeks → `nan`
 - [#42027](https://github.com/vllm-project/vllm/pull/42027) [Kernel][MoE] Add GELU_TANH to CPU, CUTLASS, and WNA16 MoE backends — @lesj0610 → `nan`
 - [#42187](https://github.com/vllm-project/vllm/pull/42187) [ModelRunnerV2] Avoid pipeline parallel bubbles — @njhill → `nan`
 - [#44350](https://github.com/vllm-project/vllm/pull/44350) [Misc] Remove stray empty file — @MatthewBonanni → `nan`
@@ -69,9 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#44256](https://github.com/vllm-project/vllm/pull/44256) [ROCm][CI] Skip unbacked dynamic shapes tests on PyTorch < 2.11 — @JartX → `nan`
 - [#44246](https://github.com/vllm-project/vllm/pull/44246) [DSV4] Remove unncessary classes & functions — @WoosukKwon → `nan`
 - [#44234](https://github.com/vllm-project/vllm/pull/44234) [Test][BugFix] Fix double-BOS in PD+specdec acceptance test — @njhill → `nan`
-- [#44248](https://github.com/vllm-project/vllm/pull/44248) [BugFix][CI] Fix added `_has_module` tests — @njhill → `nan`
-- [#40096](https://github.com/vllm-project/vllm/pull/40096) [Frontend][Core] Add sparse NCCL weight transfer support for in-place updates — @bedeks → `nan`
-- [#43779](https://github.com/vllm-project/vllm/pull/43779) [Rust Frontend] Support streaming `generate` endpoint — @Xunzhuo → `nan`
-- _…and 169 more_
+- _…and 172 more_
 
 </details>
