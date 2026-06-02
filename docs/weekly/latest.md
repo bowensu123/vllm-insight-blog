@@ -8,10 +8,23 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (223)
+## PRs merged this window (229)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#39667](https://github.com/vllm-project/vllm/pull/39667) Bump actions/github-script from 8.0.0 to 9.0.0 — @dependabot[bot] → `nan`
+- [#43458](https://github.com/vllm-project/vllm/pull/43458) [MRV2] Also enable MRV2 for Llama and Mistral dense models  — @njhill → `nan`
+- [#44283](https://github.com/vllm-project/vllm/pull/44283) [Anthropic] Support system role messages inside messages array — @chaunceyjiang → `nan`
+- [#43339](https://github.com/vllm-project/vllm/pull/43339) [Feature] Support EPLB for DeepSeek v4 Mega Moe — @wzhao18 → `nan`
+- [#43669](https://github.com/vllm-project/vllm/pull/43669) [Bugfix] flashinfer: fail fast when --kv-cache-dtype nvfp4 used on unsupported arch — @Kartavyasonar → `nan`
+- [#43100](https://github.com/vllm-project/vllm/pull/43100) [BugFix] Fix Humming MoE deploy error — @adotdad → `nan`
+- [#43963](https://github.com/vllm-project/vllm/pull/43963) [XPU] Enable rms_norm/act quant fusions — @zhenwei-intel → `nan`
+- [#44279](https://github.com/vllm-project/vllm/pull/44279) [Refactor] Remove dead code from parser infrastructure — @sfeng33 → `nan`
+- [#44274](https://github.com/vllm-project/vllm/pull/44274) [Core] Move `max_concurrent_batches` to `VllmConfig` — @njhill → `nan`
+- [#44025](https://github.com/vllm-project/vllm/pull/44025) [compressed-tensors] Asymmetric support for MoE WNA16 marlin — @brian-dellabetta → `nan`
+- [#43843](https://github.com/vllm-project/vllm/pull/43843) [Misc] Support local image encoding in benchmarks — @xiaozcy → `nan`
+- [#44013](https://github.com/vllm-project/vllm/pull/44013) Migrate header files to torch stable abi — @cleonard530 → `nan`
+- [#44320](https://github.com/vllm-project/vllm/pull/44320) [Rust Frontend] Cover different thinking modes in roundtrip tests — @BugenZhao → `nan`
 - [#44308](https://github.com/vllm-project/vllm/pull/44308) [ROCm] Fix AITER RMSNormQuantFusion for Kimi-Linear — @pschlan-amd → `nan`
 - [#44299](https://github.com/vllm-project/vllm/pull/44299) [Rust Frontend] Support recursive tool parameter conversion — @BugenZhao → `nan`
 - [#44168](https://github.com/vllm-project/vllm/pull/44168) [XPU] [Bug] remove xpuw4a16 output size check — @zufangzhu → `nan`
@@ -59,19 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43992](https://github.com/vllm-project/vllm/pull/43992) [Feature] Add support for JetBrains' Mellum v2 code generation model — @shadeMe → `nan`
 - [#43706](https://github.com/vllm-project/vllm/pull/43706) [Perf] Optimize cutlass fp8 scaled mm bypassing padding, 20% kernel performance improvement — @yewentao256 → `nan`
 - [#44146](https://github.com/vllm-project/vllm/pull/44146) [XPU][CI] Fix test_audio_in_video flake by using module-scoped server fixture — @chaojun-zhang → `nan`
-- [#43770](https://github.com/vllm-project/vllm/pull/43770) [Bugfix] fix wrong partial_rotary_factor calculation for bailing_moe model. — @zzt93 → `nan`
-- [#43481](https://github.com/vllm-project/vllm/pull/43481) [Rust Frontend] Add InternLM2 tool parser — @willamhou → `nan`
-- [#44153](https://github.com/vllm-project/vllm/pull/44153) [Frontend] Resettle generative scoring entrypoint. — @noooop → `nan`
-- [#42944](https://github.com/vllm-project/vllm/pull/42944) fix: glm5.1 pp model loading — @UranusSeven → `nan`
-- [#42730](https://github.com/vllm-project/vllm/pull/42730) [CPU][RISC-V] Add missing RVV cpu_types helpers for WNA16 — @wcynb1023 → `nan`
-- [#44159](https://github.com/vllm-project/vllm/pull/44159) [Docs] Replace broken video url in examples — @Isotr0py → `nan`
-- [#44035](https://github.com/vllm-project/vllm/pull/44035) [BugFix] Fix `_has_module` to verify native deps via trial import — @jeffreywang-anyscale → `nan`
-- [#44078](https://github.com/vllm-project/vllm/pull/44078) [MRV2] Remove Eagle's dedicated CUDA graph pool — @LucasWilkinson → `nan`
-- [#36254](https://github.com/vllm-project/vllm/pull/36254) [Misc] Use VLLMValidationError consistently in chat completion and completion protocol validators — @umut-polat → `nan`
-- [#44118](https://github.com/vllm-project/vllm/pull/44118) docs: fix MLA attention docstring examples — @nightcityblade → `nan`
-- [#43956](https://github.com/vllm-project/vllm/pull/43956) [CI/Build] Enable Step3p7ForConditionalGeneration testing — @jeejeelee → `nan`
-- [#41813](https://github.com/vllm-project/vllm/pull/41813) [CPU][Zen] Route W8A8 and W4A16 linear inference through zentorch on AMD Zen CPUs — @aadwived → `nan`
-- [#44050](https://github.com/vllm-project/vllm/pull/44050) [MRV2] Support breakable CUDA graph — @WoosukKwon → `nan`
-- _…and 163 more_
+- _…and 169 more_
 
 </details>
