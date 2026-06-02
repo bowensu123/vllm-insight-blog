@@ -12,6 +12,11 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#42027](https://github.com/vllm-project/vllm/pull/42027) [Kernel][MoE] Add GELU_TANH to CPU, CUTLASS, and WNA16 MoE backends — @lesj0610 → `nan`
+- [#42187](https://github.com/vllm-project/vllm/pull/42187) [ModelRunnerV2] Avoid pipeline parallel bubbles — @njhill → `nan`
+- [#44350](https://github.com/vllm-project/vllm/pull/44350) [Misc] Remove stray empty file — @MatthewBonanni → `nan`
+- [#44082](https://github.com/vllm-project/vllm/pull/44082) [Bugfix] Cache the EAGLE/MTP lookahead block in the SWA prefix-cache mask — @ivanium → `nan`
+- [#44338](https://github.com/vllm-project/vllm/pull/44338) [MRV2] Remove assignment of graph_pool in cudagraph_utils — @WoosukKwon → `nan`
 - [#39667](https://github.com/vllm-project/vllm/pull/39667) Bump actions/github-script from 8.0.0 to 9.0.0 — @dependabot[bot] → `nan`
 - [#43458](https://github.com/vllm-project/vllm/pull/43458) [MRV2] Also enable MRV2 for Llama and Mistral dense models  — @njhill → `nan`
 - [#44283](https://github.com/vllm-project/vllm/pull/44283) [Anthropic] Support system role messages inside messages array — @chaunceyjiang → `nan`
@@ -67,11 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#44248](https://github.com/vllm-project/vllm/pull/44248) [BugFix][CI] Fix added `_has_module` tests — @njhill → `nan`
 - [#40096](https://github.com/vllm-project/vllm/pull/40096) [Frontend][Core] Add sparse NCCL weight transfer support for in-place updates — @bedeks → `nan`
 - [#43779](https://github.com/vllm-project/vllm/pull/43779) [Rust Frontend] Support streaming `generate` endpoint — @Xunzhuo → `nan`
-- [#41294](https://github.com/vllm-project/vllm/pull/41294) [ROCm][CI] Fix and stabilize EAGLE3 acceptance tests — @AndreasKaratzas → `nan`
-- [#44161](https://github.com/vllm-project/vllm/pull/44161) [Kernel][DSv4] Optimize sparse FP8 compressor kernels — @zyongye → `nan`
-- [#43992](https://github.com/vllm-project/vllm/pull/43992) [Feature] Add support for JetBrains' Mellum v2 code generation model — @shadeMe → `nan`
-- [#43706](https://github.com/vllm-project/vllm/pull/43706) [Perf] Optimize cutlass fp8 scaled mm bypassing padding, 20% kernel performance improvement — @yewentao256 → `nan`
-- [#44146](https://github.com/vllm-project/vllm/pull/44146) [XPU][CI] Fix test_audio_in_video flake by using module-scoped server fixture — @chaojun-zhang → `nan`
 - _…and 169 more_
 
 </details>
