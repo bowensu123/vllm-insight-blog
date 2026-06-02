@@ -8,10 +8,22 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (214)
+## PRs merged this window (218)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#43754](https://github.com/vllm-project/vllm/pull/43754) [HARDWARE][POWER] Enable SHM communicator support for PowerPC — @Rukhaiya2004 → `nan`
+- [#44126](https://github.com/vllm-project/vllm/pull/44126) [Multimodal] Automatically select registered video loader for VLM — @Isotr0py → `nan`
+- [#42977](https://github.com/vllm-project/vllm/pull/42977) [Parser] Migrate `ResponsesParser` to unified `Parser` interface — @albertoperdomo2 → `nan`
+- [#41627](https://github.com/vllm-project/vllm/pull/41627) [EC Connector] Non blocking EC Connector lookup — @omerpaz95 → `nan`
+- [#44165](https://github.com/vllm-project/vllm/pull/44165) [Core][Refactor]: thread `scheduler_block_size` into KVCacheManager and KVCacheCoordinator — @ivanium → `nan`
+- [#43883](https://github.com/vllm-project/vllm/pull/43883) [Rust Frontend] add  --enable-request-id-headers flag support. — @cinnamonica02 → `nan`
+- [#44177](https://github.com/vllm-project/vllm/pull/44177) [kv_offload] Add `@override` decorators to subclass method implementations — @ronensc → `nan`
+- [#43534](https://github.com/vllm-project/vllm/pull/43534) [CPU][Perf] Enable fused kernels for GDN's gated delta rules — @fadara01 → `nan`
+- [#44220](https://github.com/vllm-project/vllm/pull/44220) [Perf] use triton moe backend on hopper by default — @ZJY0516 → `nan`
+- [#44267](https://github.com/vllm-project/vllm/pull/44267) [Refactor] Unify reasoning + tool-call parsing behind Parser.parse() — @sfeng33 → `nan`
+- [#43991](https://github.com/vllm-project/vllm/pull/43991) [Model Runner V2] Use actual batch max_seq_len for attn metadata — @izhuhaoran → `nan`
+- [#43990](https://github.com/vllm-project/vllm/pull/43990) [Model Runner V2] Support zeroing freshly allocated KV blocks for hybrid + fp8 KVCache — @izhuhaoran → `nan`
 - [#43798](https://github.com/vllm-project/vllm/pull/43798) [Bugfix] Convert Gemma4-MM ViT linear layers to vllm native impl — @Isotr0py → `nan`
 - [#41714](https://github.com/vllm-project/vllm/pull/41714) [MM][CG] Profile encoder CUDA graph pool memory — @BWAAEEEK → `nan`
 - [#43930](https://github.com/vllm-project/vllm/pull/43930) [XPU][Bugfix] Fix per_token_group_fp8_quant missing dummy args on XPU — @chaojun-zhang → `nan`
@@ -60,18 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#44033](https://github.com/vllm-project/vllm/pull/44033) Revert "[MoE Refactor] Migrate MoeWNA16Method quantization to MK orac… — @bnellnm → `nan`
 - [#43974](https://github.com/vllm-project/vllm/pull/43974) [CI] Fix smoke test step key to bypass block gate — @khluu → `nan`
 - [#44023](https://github.com/vllm-project/vllm/pull/44023) [CI] Remove duplicate Harmony test coverage — @sfeng33 → `nan`
-- [#43108](https://github.com/vllm-project/vllm/pull/43108) [MoE Refactor] Remove supports_expert_map — @bnellnm → `nan`
-- [#42647](https://github.com/vllm-project/vllm/pull/42647) [MoE Refactor] Migrate MoeWNA16Method quantization to MK oracle — @bnellnm → `nan`
-- [#44009](https://github.com/vllm-project/vllm/pull/44009) [Frontend] Clean up stop_token_ids override for Harmony — @yzong-rh → `nan`
-- [#43346](https://github.com/vllm-project/vllm/pull/43346) [Metrics] Exclude KV transfer tokens from iteration_tokens_total — @tlrmchlsmth → `nan`
-- [#43688](https://github.com/vllm-project/vllm/pull/43688) [Feature] SSL support for dp supervisor — @yewentao256 → `nan`
-- [#44019](https://github.com/vllm-project/vllm/pull/44019) Add @khluu to CODEOWNERS — @khluu → `nan`
-- [#44011](https://github.com/vllm-project/vllm/pull/44011) [CI] Remove redundant test_chat_with_tool_reasoning.py — @sfeng33 → `nan`
-- [#43971](https://github.com/vllm-project/vllm/pull/43971) [CI] Make Model Executor test hangs fail fast with a traceback — @khluu → `nan`
-- [#44005](https://github.com/vllm-project/vllm/pull/44005) [Bug] Fix torch device issue for MOE permute — @yewentao256 → `nan`
-- [#43998](https://github.com/vllm-project/vllm/pull/43998) [Bugfix] Fix Ray placement group allocation with grouped nodes — @czhu-cohere → `nan`
-- [#43988](https://github.com/vllm-project/vllm/pull/43988) [Bugfix] Use storage_block_size in KV cache reshape for compressed specs (DeepSeek V4) — @zixi-qi → `nan`
-- [#43219](https://github.com/vllm-project/vllm/pull/43219) [EPLB] Make async EPLB default — @ilmarkov → `nan`
-- _…and 154 more_
+- _…and 158 more_
 
 </details>
