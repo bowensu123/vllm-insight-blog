@@ -8,10 +8,21 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (210)
+## PRs merged this window (214)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#43798](https://github.com/vllm-project/vllm/pull/43798) [Bugfix] Convert Gemma4-MM ViT linear layers to vllm native impl — @Isotr0py → `nan`
+- [#41714](https://github.com/vllm-project/vllm/pull/41714) [MM][CG] Profile encoder CUDA graph pool memory — @BWAAEEEK → `nan`
+- [#43930](https://github.com/vllm-project/vllm/pull/43930) [XPU][Bugfix] Fix per_token_group_fp8_quant missing dummy args on XPU — @chaojun-zhang → `nan`
+- [#42959](https://github.com/vllm-project/vllm/pull/42959) [BugFix][kv_offload]: Prevent offloading stale sliding window blocks — @orozery → `nan`
+- [#38053](https://github.com/vllm-project/vllm/pull/38053) [BugFix] Fix TypeError in MiniCPM-O audio feature unpadding — @Krishnachaitanyakc → `nan`
+- [#44131](https://github.com/vllm-project/vllm/pull/44131) [CI] Stabilize OpenAI schema fuzzing for malformed structural tags — @AndreasKaratzas → `nan`
+- [#44017](https://github.com/vllm-project/vllm/pull/44017) [Refactor] Move unstreamed tool-arg flush from serving layer to parser — @sfeng33 → `nan`
+- [#44266](https://github.com/vllm-project/vllm/pull/44266) [Bugfix][CI] Normalize NIXL connector CUDA wheel installs — @alec-flowers → `nan`
+- [#44265](https://github.com/vllm-project/vllm/pull/44265) [ROCm] Upgrade AITER to v0.1.13.post1 — @micah-wil → `nan`
+- [#43742](https://github.com/vllm-project/vllm/pull/43742) [Bugfix][Mooncake] Release GPU pin on failed store in MooncakeStoreConnector — @Dao007forever → `nan`
+- [#44262](https://github.com/vllm-project/vllm/pull/44262) [DSV4] Refactor RoPE initialization — @WoosukKwon → `nan`
 - [#44256](https://github.com/vllm-project/vllm/pull/44256) [ROCm][CI] Skip unbacked dynamic shapes tests on PyTorch < 2.11 — @JartX → `nan`
 - [#44246](https://github.com/vllm-project/vllm/pull/44246) [DSV4] Remove unncessary classes & functions — @WoosukKwon → `nan`
 - [#44234](https://github.com/vllm-project/vllm/pull/44234) [Test][BugFix] Fix double-BOS in PD+specdec acceptance test — @njhill → `nan`
@@ -61,17 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43998](https://github.com/vllm-project/vllm/pull/43998) [Bugfix] Fix Ray placement group allocation with grouped nodes — @czhu-cohere → `nan`
 - [#43988](https://github.com/vllm-project/vllm/pull/43988) [Bugfix] Use storage_block_size in KV cache reshape for compressed specs (DeepSeek V4) — @zixi-qi → `nan`
 - [#43219](https://github.com/vllm-project/vllm/pull/43219) [EPLB] Make async EPLB default — @ilmarkov → `nan`
-- [#42553](https://github.com/vllm-project/vllm/pull/42553) [MoE Refactor] WNA16 MoE backend selection into oracle module — @bnellnm → `nan`
-- [#43616](https://github.com/vllm-project/vllm/pull/43616) [Bugfix] Disable allreduce_rms_fusion when pipeline_parallel_size > 1 — @zixi-qi → `nan`
-- [#43818](https://github.com/vllm-project/vllm/pull/43818) [Misc] added unit tests for the core pooling methods — @taneem-ibrahim → `nan`
-- [#43922](https://github.com/vllm-project/vllm/pull/43922) docs: clarify ITL acronym in optimization docs — @chunyang-wen → `nan`
-- [#43857](https://github.com/vllm-project/vllm/pull/43857) Add vLLM library info to Hugging Face Hub requests — @Wauplin → `nan`
-- [#43977](https://github.com/vllm-project/vllm/pull/43977) [Bugfix][CPU] Remove invalid extra deps — @bigPYJ1151 → `nan`
-- [#43972](https://github.com/vllm-project/vllm/pull/43972) Skip docs build if PR doesn't affect docs — @hmellor → `nan`
-- [#43961](https://github.com/vllm-project/vllm/pull/43961) [Bugfix] Corrupted MLA + linear attention — @gau-nernst → `nan`
-- [#42982](https://github.com/vllm-project/vllm/pull/42982) [ROCm][Perf] DSv3.2 MI355X TP4 decode-step orchestration cleanup (3 micro-opts) — @frida-andersson → `nan`
-- [#42595](https://github.com/vllm-project/vllm/pull/42595) [Bugfix] [ROCm] [DSV4] Fix AITER MXFP4 MoE weight loading and shuffle… — @MHYangAMD → `nan`
-- [#41394](https://github.com/vllm-project/vllm/pull/41394) [Kernel][ROCm] Native W4A16 kernel for AMD RDNA3 (gfx1100) — fp16 + bf16 — @JartX → `nan`
-- _…and 150 more_
+- _…and 154 more_
 
 </details>
