@@ -8,10 +8,23 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (218)
+## PRs merged this window (223)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44308](https://github.com/vllm-project/vllm/pull/44308) [ROCm] Fix AITER RMSNormQuantFusion for Kimi-Linear — @pschlan-amd → `nan`
+- [#44299](https://github.com/vllm-project/vllm/pull/44299) [Rust Frontend] Support recursive tool parameter conversion — @BugenZhao → `nan`
+- [#44168](https://github.com/vllm-project/vllm/pull/44168) [XPU] [Bug] remove xpuw4a16 output size check — @zufangzhu → `nan`
+- [#43978](https://github.com/vllm-project/vllm/pull/43978) [BugFix] [GDN] Read linear_key_head_dim from hf_text_config for multimodal models — @IdoAtadTD → `nan`
+- [#44065](https://github.com/vllm-project/vllm/pull/44065) [FlashAttention] Sync FA with upstream — @MatthewBonanni → `nan`
+- [#44282](https://github.com/vllm-project/vllm/pull/44282) [Bugfix] Vendor MiniCPMV/MiniCPMO processors to unblock Transformers v5  — @wjinxu → `nan`
+- [#42958](https://github.com/vllm-project/vllm/pull/42958) Support ModelOpt MXFP8 non-gated MoE — @TomerBN-Nvidia → `nan`
+- [#44232](https://github.com/vllm-project/vllm/pull/44232) [Bugfix] Fix Gemma4 startup crash with recent transformers multimodal processor — @lucianommartins → `nan`
+- [#42967](https://github.com/vllm-project/vllm/pull/42967) [Bugfix] Sync block_size from EngineCore to frontend for hybrid Mamba… — @Gruner-atero → `nan`
+- [#44170](https://github.com/vllm-project/vllm/pull/44170) [Frontend] Consolidate dev entrypoints. — @noooop → `nan`
+- [#42971](https://github.com/vllm-project/vllm/pull/42971) Fix DFlash prefix cache corruption due to missing lookahead block — @shreyas269 → `nan`
+- [#43421](https://github.com/vllm-project/vllm/pull/43421) [XPU][Mamba] Triton-based selective scan forward op for XPU — @mfylcek → `nan`
+- [#44206](https://github.com/vllm-project/vllm/pull/44206) [KV Offload] Add `on_schedule_end()` hook to separate step lifecycle from event draining — @ronensc → `nan`
 - [#43754](https://github.com/vllm-project/vllm/pull/43754) [HARDWARE][POWER] Enable SHM communicator support for PowerPC — @Rukhaiya2004 → `nan`
 - [#44126](https://github.com/vllm-project/vllm/pull/44126) [Multimodal] Automatically select registered video loader for VLM — @Isotr0py → `nan`
 - [#42977](https://github.com/vllm-project/vllm/pull/42977) [Parser] Migrate `ResponsesParser` to unified `Parser` interface — @albertoperdomo2 → `nan`
@@ -59,19 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43956](https://github.com/vllm-project/vllm/pull/43956) [CI/Build] Enable Step3p7ForConditionalGeneration testing — @jeejeelee → `nan`
 - [#41813](https://github.com/vllm-project/vllm/pull/41813) [CPU][Zen] Route W8A8 and W4A16 linear inference through zentorch on AMD Zen CPUs — @aadwived → `nan`
 - [#44050](https://github.com/vllm-project/vllm/pull/44050) [MRV2] Support breakable CUDA graph — @WoosukKwon → `nan`
-- [#43909](https://github.com/vllm-project/vllm/pull/43909) [Bug] Fix gemma4 MTP IMA issue when TP>1, `CUDA error: an illegal memory access was encountered` — @yewentao256 → `nan`
-- [#44047](https://github.com/vllm-project/vllm/pull/44047) [Governance] Add @BugenZhao as Rust frontend code owner — @BugenZhao → `nan`
-- [#43817](https://github.com/vllm-project/vllm/pull/43817) [ROCm] Add attention sink support to AITer flash attention backend — @sphinx07 → `nan`
-- [#42379](https://github.com/vllm-project/vllm/pull/42379) [Bugfix] Fix RMSNorm kernels to multiply in weight's native dtype — @liulanze → `nan`
-- [#43571](https://github.com/vllm-project/vllm/pull/43571) [BugFix][Platform] Fix import vllm.platforms.rocm error on non-CUDA test_gpt_oss.py — @Liangliang-Ma → `nan`
-- [#43881](https://github.com/vllm-project/vllm/pull/43881) [ROCm] cmake: support PYTORCH_FOUND_HIP for torch 2.13 native HIP language support — @nemanjaudovic → `nan`
-- [#44028](https://github.com/vllm-project/vllm/pull/44028) [ROCm][CI] Fix failure in the Phi3V pooling test — @AndreasKaratzas → `nan`
-- [#43997](https://github.com/vllm-project/vllm/pull/43997) [Refactor] Remove dead current_tool_name_sent assignments from tool parsers — @sfeng33 → `nan`
-- [#43792](https://github.com/vllm-project/vllm/pull/43792) offload prompt_embeds decode in render_prompts_async to avoid blocking — @gagandhakrey → `nan`
-- [#38445](https://github.com/vllm-project/vllm/pull/38445) [PERF]MiniMax-M2 gate kernel — @jeejeelee → `nan`
-- [#44033](https://github.com/vllm-project/vllm/pull/44033) Revert "[MoE Refactor] Migrate MoeWNA16Method quantization to MK orac… — @bnellnm → `nan`
-- [#43974](https://github.com/vllm-project/vllm/pull/43974) [CI] Fix smoke test step key to bypass block gate — @khluu → `nan`
-- [#44023](https://github.com/vllm-project/vllm/pull/44023) [CI] Remove duplicate Harmony test coverage — @sfeng33 → `nan`
-- _…and 158 more_
+- _…and 163 more_
 
 </details>
