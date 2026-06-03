@@ -1,4 +1,4 @@
-# vLLM weekly digest — 2026-06-02 (W23)
+# vLLM weekly digest — 2026-06-03 (W23)
 
 _Window: last 7 days · upstream: [vllm-project/vllm](https://github.com/vllm-project/vllm)_
 
@@ -12,6 +12,15 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44042](https://github.com/vllm-project/vllm/pull/44042) [CI] Reject out-of-vocabulary  before they reach the GPU logprob path — @AndreasKaratzas → `nan`
+- [#44369](https://github.com/vllm-project/vllm/pull/44369) [ROCm][CI] Skip fp8 reload tests on gfx90a (MI250) — @JartX → `nan`
+- [#44368](https://github.com/vllm-project/vllm/pull/44368) [ROCm][CI] Fix stale wvSplitK GEMM fallback test for N=5 — @JartX → `nan`
+- [#43838](https://github.com/vllm-project/vllm/pull/43838) [Platform] Add is_cumem_allocator_available — @wangxiyuan → `nan`
+- [#44366](https://github.com/vllm-project/vllm/pull/44366) [docker] Stop using extra-index-url for flashinfer-jit-cache — @khluu → `nan`
+- [#44356](https://github.com/vllm-project/vllm/pull/44356) [Bugfix] Fix Deepseek v4 non-mega-moe model init error — @wzhao18 → `nan`
+- [#42191](https://github.com/vllm-project/vllm/pull/42191) [Perf] Apply single-pass min_larger finding and binary search in Triton Top-p path. — @cakeng → `nan`
+- [#44367](https://github.com/vllm-project/vllm/pull/44367) [DSV4] Minor cleanup for DeepseekV4MegaMoEExperts — @WoosukKwon → `nan`
+- [#44128](https://github.com/vllm-project/vllm/pull/44128) [Misc] Remove dead VLLM_RPC_TIMEOUT env var and fix profiling doc that references it — @DaoyuanLi2816 → `nan`
 - [#43332](https://github.com/vllm-project/vllm/pull/43332) [MoE/b12x] Accept W4A16 (kNvfp4Static, None) in FlashInferB12xExperts supports check — @ECMGit → `nan`
 - [#44036](https://github.com/vllm-project/vllm/pull/44036) [CI/Build] Bump flashinfer to v0.6.12 — @vadiklyutiy → `nan`
 - [#44345](https://github.com/vllm-project/vllm/pull/44345) [BugFix] Fix sparse NCCL weight transfer test construction — @bedeks → `nan`
@@ -63,15 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43930](https://github.com/vllm-project/vllm/pull/43930) [XPU][Bugfix] Fix per_token_group_fp8_quant missing dummy args on XPU — @chaojun-zhang → `nan`
 - [#42959](https://github.com/vllm-project/vllm/pull/42959) [BugFix][kv_offload]: Prevent offloading stale sliding window blocks — @orozery → `nan`
 - [#38053](https://github.com/vllm-project/vllm/pull/38053) [BugFix] Fix TypeError in MiniCPM-O audio feature unpadding — @Krishnachaitanyakc → `nan`
-- [#44131](https://github.com/vllm-project/vllm/pull/44131) [CI] Stabilize OpenAI schema fuzzing for malformed structural tags — @AndreasKaratzas → `nan`
-- [#44017](https://github.com/vllm-project/vllm/pull/44017) [Refactor] Move unstreamed tool-arg flush from serving layer to parser — @sfeng33 → `nan`
-- [#44266](https://github.com/vllm-project/vllm/pull/44266) [Bugfix][CI] Normalize NIXL connector CUDA wheel installs — @alec-flowers → `nan`
-- [#44265](https://github.com/vllm-project/vllm/pull/44265) [ROCm] Upgrade AITER to v0.1.13.post1 — @micah-wil → `nan`
-- [#43742](https://github.com/vllm-project/vllm/pull/43742) [Bugfix][Mooncake] Release GPU pin on failed store in MooncakeStoreConnector — @Dao007forever → `nan`
-- [#44262](https://github.com/vllm-project/vllm/pull/44262) [DSV4] Refactor RoPE initialization — @WoosukKwon → `nan`
-- [#44256](https://github.com/vllm-project/vllm/pull/44256) [ROCm][CI] Skip unbacked dynamic shapes tests on PyTorch < 2.11 — @JartX → `nan`
-- [#44246](https://github.com/vllm-project/vllm/pull/44246) [DSV4] Remove unncessary classes & functions — @WoosukKwon → `nan`
-- [#44234](https://github.com/vllm-project/vllm/pull/44234) [Test][BugFix] Fix double-BOS in PD+specdec acceptance test — @njhill → `nan`
 - _…and 172 more_
 
 </details>
