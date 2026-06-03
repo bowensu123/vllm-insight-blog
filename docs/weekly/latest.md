@@ -8,10 +8,18 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (247)
+## PRs merged this window (252)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#35078](https://github.com/vllm-project/vllm/pull/35078) Bump actions/stale from 10.1.1 to 10.3.0 — @dependabot[bot] → `nan`
+- [#44442](https://github.com/vllm-project/vllm/pull/44442) [Minor] Remove FlashInfer version check in topk_topp_sampler — @WoosukKwon → `nan`
+- [#44253](https://github.com/vllm-project/vllm/pull/44253) [Bug Fix][Model Runner V2][Spec Decode] Warmup & capture with different attention states for speculator prefill — @TheEpicDolphin → `nan`
+- [#42752](https://github.com/vllm-project/vllm/pull/42752) [Bugfix] Honor tool_choice="none" in Chat Completions streaming — @hoobnn → `nan`
+- [#42453](https://github.com/vllm-project/vllm/pull/42453) [Feature] Support batch invariant rms norm with residual — @yewentao256 → `nan`
+- [#44429](https://github.com/vllm-project/vllm/pull/44429) [Model] Add Gemma4 Unified (encoder-free)  support — @lucianommartins → `nan`
+- [#44413](https://github.com/vllm-project/vllm/pull/44413) [LoRA] Fix dedup for post-replacement module aliases — @linitra24 → `nan`
+- [#44122](https://github.com/vllm-project/vllm/pull/44122) [Refactor] Remove dead code fp quant — @yewentao256 → `nan`
 - [#44370](https://github.com/vllm-project/vllm/pull/44370) [ROCm][CI] Move Model Executor test step from MI250 to MI300 (gfx942) — @JartX → `nan`
 - [#44365](https://github.com/vllm-project/vllm/pull/44365) [10b/n] Migrate custom all-reduce, DeepSeek V4 fused MLA, MiniMax reduce-RMS, and MXFP8 MoE to libtorch stable ABI — @cleonard530 → `nan`
 - [#43659](https://github.com/vllm-project/vllm/pull/43659) Handle spinloop ext load failure gracefully — @pschlan-amd → `nan`
@@ -64,14 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#39667](https://github.com/vllm-project/vllm/pull/39667) Bump actions/github-script from 8.0.0 to 9.0.0 — @dependabot[bot] → `nan`
 - [#43458](https://github.com/vllm-project/vllm/pull/43458) [MRV2] Also enable MRV2 for Llama and Mistral dense models  — @njhill → `nan`
 - [#44283](https://github.com/vllm-project/vllm/pull/44283) [Anthropic] Support system role messages inside messages array — @chaunceyjiang → `nan`
-- [#43339](https://github.com/vllm-project/vllm/pull/43339) [Feature] Support EPLB for DeepSeek v4 Mega Moe — @wzhao18 → `nan`
-- [#43669](https://github.com/vllm-project/vllm/pull/43669) [Bugfix] flashinfer: fail fast when --kv-cache-dtype nvfp4 used on unsupported arch — @Kartavyasonar → `nan`
-- [#43100](https://github.com/vllm-project/vllm/pull/43100) [BugFix] Fix Humming MoE deploy error — @adotdad → `nan`
-- [#43963](https://github.com/vllm-project/vllm/pull/43963) [XPU] Enable rms_norm/act quant fusions — @zhenwei-intel → `nan`
-- [#44279](https://github.com/vllm-project/vllm/pull/44279) [Refactor] Remove dead code from parser infrastructure — @sfeng33 → `nan`
-- [#44274](https://github.com/vllm-project/vllm/pull/44274) [Core] Move `max_concurrent_batches` to `VllmConfig` — @njhill → `nan`
-- [#44025](https://github.com/vllm-project/vllm/pull/44025) [compressed-tensors] Asymmetric support for MoE WNA16 marlin — @brian-dellabetta → `nan`
-- [#43843](https://github.com/vllm-project/vllm/pull/43843) [Misc] Support local image encoding in benchmarks — @xiaozcy → `nan`
-- _…and 187 more_
+- _…and 192 more_
 
 </details>
