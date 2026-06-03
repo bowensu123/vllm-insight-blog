@@ -8,10 +8,23 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (232)
+## PRs merged this window (239)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44388](https://github.com/vllm-project/vllm/pull/44388) [Doc] Update ViT CUDA graph interfaces — @shen-shanshan → `nan`
+- [#44311](https://github.com/vllm-project/vllm/pull/44311) [Rust Frontend] Fix several hf chat template rendering issues — @BugenZhao → `nan`
+- [#43778](https://github.com/vllm-project/vllm/pull/43778) [Rust Frontend] Add dynamic LoRA endpoints — @Xunzhuo → `nan`
+- [#43774](https://github.com/vllm-project/vllm/pull/43774) [Rust Frontend] Add server router extension hook — @NolanHo → `nan`
+- [#44287](https://github.com/vllm-project/vllm/pull/44287) [KV Offloading] Enable HMA models for Tiering Offloading — @varun-sundar-rabindranath → `nan`
+- [#44251](https://github.com/vllm-project/vllm/pull/44251) [Perf] Add tuned selective_state_update configs for H200 and RTX PRO … — @Majid-Taheri → `nan`
+- [#36949](https://github.com/vllm-project/vllm/pull/36949) [ROCm][CI] Optimize ROCm Docker build: registry cache, DeepEP, and ci-bake script — @AndreasKaratzas → `nan`
+- [#42758](https://github.com/vllm-project/vllm/pull/42758) Enable perf_token_group_quant/_C_stable_libtorch for ROCm — @charlifu → `nan`
+- [#44244](https://github.com/vllm-project/vllm/pull/44244) [Benchmark] Enable reasoning-model (thinking) benchmarking via `--chat-template-kwargs` for client-rendered datasets — @qiching → `nan`
+- [#43862](https://github.com/vllm-project/vllm/pull/43862) [Bugfix] fix crash in postprocess for null tool args  — @william-rom → `nan`
+- [#44236](https://github.com/vllm-project/vllm/pull/44236) fix: resolve CUTLASS fmin compatibility for DeepSeek-V4 init — @Oxygen56 → `nan`
+- [#44293](https://github.com/vllm-project/vllm/pull/44293) Nit Changes in Tiered KV Offload — @rshavitt → `nan`
+- [#44352](https://github.com/vllm-project/vllm/pull/44352) [CI] Add missing vllm/parser/ CI trigger and fix test_parse.py  — @sfeng33 → `nan`
 - [#44042](https://github.com/vllm-project/vllm/pull/44042) [CI] Reject out-of-vocabulary  before they reach the GPU logprob path — @AndreasKaratzas → `nan`
 - [#44369](https://github.com/vllm-project/vllm/pull/44369) [ROCm][CI] Skip fp8 reload tests on gfx90a (MI250) — @JartX → `nan`
 - [#44368](https://github.com/vllm-project/vllm/pull/44368) [ROCm][CI] Fix stale wvSplitK GEMM fallback test for N=5 — @JartX → `nan`
@@ -59,19 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#44126](https://github.com/vllm-project/vllm/pull/44126) [Multimodal] Automatically select registered video loader for VLM — @Isotr0py → `nan`
 - [#42977](https://github.com/vllm-project/vllm/pull/42977) [Parser] Migrate `ResponsesParser` to unified `Parser` interface — @albertoperdomo2 → `nan`
 - [#41627](https://github.com/vllm-project/vllm/pull/41627) [EC Connector] Non blocking EC Connector lookup — @omerpaz95 → `nan`
-- [#44165](https://github.com/vllm-project/vllm/pull/44165) [Core][Refactor]: thread `scheduler_block_size` into KVCacheManager and KVCacheCoordinator — @ivanium → `nan`
-- [#43883](https://github.com/vllm-project/vllm/pull/43883) [Rust Frontend] add  --enable-request-id-headers flag support. — @cinnamonica02 → `nan`
-- [#44177](https://github.com/vllm-project/vllm/pull/44177) [kv_offload] Add `@override` decorators to subclass method implementations — @ronensc → `nan`
-- [#43534](https://github.com/vllm-project/vllm/pull/43534) [CPU][Perf] Enable fused kernels for GDN's gated delta rules — @fadara01 → `nan`
-- [#44220](https://github.com/vllm-project/vllm/pull/44220) [Perf] use triton moe backend on hopper by default — @ZJY0516 → `nan`
-- [#44267](https://github.com/vllm-project/vllm/pull/44267) [Refactor] Unify reasoning + tool-call parsing behind Parser.parse() — @sfeng33 → `nan`
-- [#43991](https://github.com/vllm-project/vllm/pull/43991) [Model Runner V2] Use actual batch max_seq_len for attn metadata — @izhuhaoran → `nan`
-- [#43990](https://github.com/vllm-project/vllm/pull/43990) [Model Runner V2] Support zeroing freshly allocated KV blocks for hybrid + fp8 KVCache — @izhuhaoran → `nan`
-- [#43798](https://github.com/vllm-project/vllm/pull/43798) [Bugfix] Convert Gemma4-MM ViT linear layers to vllm native impl — @Isotr0py → `nan`
-- [#41714](https://github.com/vllm-project/vllm/pull/41714) [MM][CG] Profile encoder CUDA graph pool memory — @BWAAEEEK → `nan`
-- [#43930](https://github.com/vllm-project/vllm/pull/43930) [XPU][Bugfix] Fix per_token_group_fp8_quant missing dummy args on XPU — @chaojun-zhang → `nan`
-- [#42959](https://github.com/vllm-project/vllm/pull/42959) [BugFix][kv_offload]: Prevent offloading stale sliding window blocks — @orozery → `nan`
-- [#38053](https://github.com/vllm-project/vllm/pull/38053) [BugFix] Fix TypeError in MiniCPM-O audio feature unpadding — @Krishnachaitanyakc → `nan`
-- _…and 172 more_
+- _…and 179 more_
 
 </details>
