@@ -8,7 +8,7 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (233)
+## PRs merged this window (227)
 
 <details><summary>Click to expand the raw list</summary>
 
@@ -72,6 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#39968](https://github.com/vllm-project/vllm/pull/39968) [XPU] Add XPU block-scaled W8A8 fp8 path — @xwu-intel → `nan`
 - [#43942](https://github.com/vllm-project/vllm/pull/43942) [Rust Frontend] Add /server_info to Rust frontend — @Xunzhuo → `nan`
 - [#43689](https://github.com/vllm-project/vllm/pull/43689) [SharedOffloadRegion] Align blocks to page-size   — @varun-sundar-rabindranath → `nan`
-- _…and 173 more_
+- _…and 167 more_
 
 </details>
