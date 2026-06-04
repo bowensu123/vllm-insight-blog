@@ -8,10 +8,16 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (232)
+## PRs merged this window (233)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44539](https://github.com/vllm-project/vllm/pull/44539) [mamba] unify KDA conv states into one cache to match 2-state SSM layout — @ZJY0516 → `nan`
+- [#43707](https://github.com/vllm-project/vllm/pull/43707) [Logs Refactor] Optimize shutdown logs, easier to follow and consistent — @yewentao256 → `nan`
+- [#41980](https://github.com/vllm-project/vllm/pull/41980) use split_group for pytorch process group creation — @tushar00jain → `nan`
+- [#43307](https://github.com/vllm-project/vllm/pull/43307) [Kernel][Test] Extend lightning_attn and awq_triton kernel tests to XPU — @adobrzyn → `nan`
+- [#44380](https://github.com/vllm-project/vllm/pull/44380) [Bugfix] Fix test_cutlass_moe.py — @bnellnm → `nan`
+- [#44471](https://github.com/vllm-project/vllm/pull/44471) [Misc] Add unit tests for pooler head classes — @taneem-ibrahim → `nan`
 - [#34894](https://github.com/vllm-project/vllm/pull/34894) [DOC] Add INT8 W4A8 docs and Arm's supported quantization schemes — @fadara01 → `nan`
 - [#44436](https://github.com/vllm-project/vllm/pull/44436) [ROCm][CI] Add test for Aiter unified attn kernel — @divakar-amd → `nan`
 - [#44057](https://github.com/vllm-project/vllm/pull/44057) [Bugfix] Reject non-positive values for ParallelConfig int knobs — @jwzheng96 → `nan`
@@ -66,12 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#39968](https://github.com/vllm-project/vllm/pull/39968) [XPU] Add XPU block-scaled W8A8 fp8 path — @xwu-intel → `nan`
 - [#43942](https://github.com/vllm-project/vllm/pull/43942) [Rust Frontend] Add /server_info to Rust frontend — @Xunzhuo → `nan`
 - [#43689](https://github.com/vllm-project/vllm/pull/43689) [SharedOffloadRegion] Align blocks to page-size   — @varun-sundar-rabindranath → `nan`
-- [#44393](https://github.com/vllm-project/vllm/pull/44393) [Attention][CPU] Standardize kv layout to blocks first — @bigPYJ1151 → `nan`
-- [#44212](https://github.com/vllm-project/vllm/pull/44212) [Perf] Improve multimodal item handling from O(n) to O(log n) per step — @andylolu2 → `nan`
-- [#42212](https://github.com/vllm-project/vllm/pull/42212) [Perf] Triton fast path for small CPU→GPU `swap_blocks_batch` in the offloading connector — @Etelis → `nan`
-- [#43759](https://github.com/vllm-project/vllm/pull/43759) [XPU]fallback to TRITON_ATTN for vit attn on xpu when use float32 dtype — @yma11 → `nan`
-- [#44348](https://github.com/vllm-project/vllm/pull/44348) [Bugfix] Fix unstreamed tool call args dropped in Responses API streaming — @sfeng33 → `nan`
-- [#44347](https://github.com/vllm-project/vllm/pull/44347) [Bugfix] Update TrtLLM MoE routing methods — @wzhao18 → `nan`
-- _…and 172 more_
+- _…and 173 more_
 
 </details>
