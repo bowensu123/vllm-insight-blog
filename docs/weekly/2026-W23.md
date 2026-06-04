@@ -8,10 +8,17 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (250)
+## PRs merged this window (248)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44493](https://github.com/vllm-project/vllm/pull/44493) [Bugfix]Fix Kimi-K2.5 FlashInfer ViT metadata — @Kevin-XiongC → `nan`
+- [#43447](https://github.com/vllm-project/vllm/pull/43447) [Prefix Caching] DeepSeekv4 - Support selective prefix-cache retention for sliding-window KV cache — @wzhao18 → `nan`
+- [#44497](https://github.com/vllm-project/vllm/pull/44497) [CI] Reverted gitignore changes — @AndreasKaratzas → `nan`
+- [#44479](https://github.com/vllm-project/vllm/pull/44479) [Frontend] Consolidate online serving utils. — @noooop → `nan`
+- [#42129](https://github.com/vllm-project/vllm/pull/42129) [Inductor] Fast-path Inductor fallback for vllm::*/vllm_aiter::* custom ops — @okorzh-amd → `nan`
+- [#44463](https://github.com/vllm-project/vllm/pull/44463) [CI] Resolve release V2 docker build after ROCm CI wheels change — @AndreasKaratzas → `nan`
+- [#41633](https://github.com/vllm-project/vllm/pull/41633) [EPLB] Nixl communicator optimization. Zero-copy transfers — @ilmarkov → `nan`
 - [#44230](https://github.com/vllm-project/vllm/pull/44230) optimize the compressor 128 split cutedsl kernel  — @Jie-Fang → `nan`
 - [#41471](https://github.com/vllm-project/vllm/pull/41471) [Refactor] Remove dead code in tests and parallel_state — @yewentao256 → `nan`
 - [#41759](https://github.com/vllm-project/vllm/pull/41759) [MM][Perf][CG] Support ViT full CUDA graph for InternVL — @oguzhankir → `nan`
@@ -65,13 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#44368](https://github.com/vllm-project/vllm/pull/44368) [ROCm][CI] Fix stale wvSplitK GEMM fallback test for N=5 — @JartX → `nan`
 - [#43838](https://github.com/vllm-project/vllm/pull/43838) [Platform] Add is_cumem_allocator_available — @wangxiyuan → `nan`
 - [#44366](https://github.com/vllm-project/vllm/pull/44366) [docker] Stop using extra-index-url for flashinfer-jit-cache — @khluu → `nan`
-- [#44356](https://github.com/vllm-project/vllm/pull/44356) [Bugfix] Fix Deepseek v4 non-mega-moe model init error — @wzhao18 → `nan`
-- [#42191](https://github.com/vllm-project/vllm/pull/42191) [Perf] Apply single-pass min_larger finding and binary search in Triton Top-p path. — @cakeng → `nan`
-- [#44367](https://github.com/vllm-project/vllm/pull/44367) [DSV4] Minor cleanup for DeepseekV4MegaMoEExperts — @WoosukKwon → `nan`
-- [#44128](https://github.com/vllm-project/vllm/pull/44128) [Misc] Remove dead VLLM_RPC_TIMEOUT env var and fix profiling doc that references it — @DaoyuanLi2816 → `nan`
-- [#43332](https://github.com/vllm-project/vllm/pull/43332) [MoE/b12x] Accept W4A16 (kNvfp4Static, None) in FlashInferB12xExperts supports check — @ECMGit → `nan`
-- [#44036](https://github.com/vllm-project/vllm/pull/44036) [CI/Build] Bump flashinfer to v0.6.12 — @vadiklyutiy → `nan`
-- [#44345](https://github.com/vllm-project/vllm/pull/44345) [BugFix] Fix sparse NCCL weight transfer test construction — @bedeks → `nan`
-- _…and 190 more_
+- _…and 188 more_
 
 </details>
