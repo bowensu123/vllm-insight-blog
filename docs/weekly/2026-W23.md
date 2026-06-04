@@ -8,10 +8,20 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (242)
+## PRs merged this window (237)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#43519](https://github.com/vllm-project/vllm/pull/43519) Add model support for granite speech plus — @zvik → `nan`
+- [#44340](https://github.com/vllm-project/vllm/pull/44340) [Quant] Support compressed-tensors WNA8O8Int linears and WNInt embeddings — @mgoin → `nan`
+- [#43827](https://github.com/vllm-project/vllm/pull/43827) [DSv4] Adding TRTLLM gen attention kernel — @zyongye → `nan`
+- [#44255](https://github.com/vllm-project/vllm/pull/44255) [ROCm][CI] Specifying time outs for the lm eval models — @AndreasKaratzas → `nan`
+- [#44046](https://github.com/vllm-project/vllm/pull/44046) [ROCm][CI] Stabilize memory-release in the Hybrid model generation tests — @AndreasKaratzas → `nan`
+- [#43625](https://github.com/vllm-project/vllm/pull/43625) [ROCm] Bump fastsafetensors to v0.3.2 from PyPI, remove git source build — @wjabbour → `nan`
+- [#42554](https://github.com/vllm-project/vllm/pull/42554) [PD][Nixl] Mamba prefix caching mode support  — @NickLucche → `nan`
+- [#44476](https://github.com/vllm-project/vllm/pull/44476) [Bugfix][Compile] Guard per_token_group_fp8_quant lookup on non-CUDA platforms — @QiliangCui2023 → `nan`
+- [#44534](https://github.com/vllm-project/vllm/pull/44534) Add GH token to docs build pre run check — @hmellor → `nan`
+- [#42443](https://github.com/vllm-project/vllm/pull/42443) Refactor CT NVFP4 linear to use a single class — @dsikka → `nan`
 - [#44205](https://github.com/vllm-project/vllm/pull/44205) [Bugfix] fix EVS for qwen3-vl — @garrygale → `nan`
 - [#43556](https://github.com/vllm-project/vllm/pull/43556) [Attention] Mamba attention module refactor - LINEAR — @wangxiyuan → `nan`
 - [#42646](https://github.com/vllm-project/vllm/pull/42646) [perf] Add gemma RMS AR fusion — @jiahanc → `nan`
@@ -62,16 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43778](https://github.com/vllm-project/vllm/pull/43778) [Rust Frontend] Add dynamic LoRA endpoints — @Xunzhuo → `nan`
 - [#43774](https://github.com/vllm-project/vllm/pull/43774) [Rust Frontend] Add server router extension hook — @NolanHo → `nan`
 - [#44287](https://github.com/vllm-project/vllm/pull/44287) [KV Offloading] Enable HMA models for Tiering Offloading — @varun-sundar-rabindranath → `nan`
-- [#44251](https://github.com/vllm-project/vllm/pull/44251) [Perf] Add tuned selective_state_update configs for H200 and RTX PRO … — @Majid-Taheri → `nan`
-- [#36949](https://github.com/vllm-project/vllm/pull/36949) [ROCm][CI] Optimize ROCm Docker build: registry cache, DeepEP, and ci-bake script — @AndreasKaratzas → `nan`
-- [#42758](https://github.com/vllm-project/vllm/pull/42758) Enable perf_token_group_quant/_C_stable_libtorch for ROCm — @charlifu → `nan`
-- [#44244](https://github.com/vllm-project/vllm/pull/44244) [Benchmark] Enable reasoning-model (thinking) benchmarking via `--chat-template-kwargs` for client-rendered datasets — @qiching → `nan`
-- [#43862](https://github.com/vllm-project/vllm/pull/43862) [Bugfix] fix crash in postprocess for null tool args  — @william-rom → `nan`
-- [#44236](https://github.com/vllm-project/vllm/pull/44236) fix: resolve CUTLASS fmin compatibility for DeepSeek-V4 init — @Oxygen56 → `nan`
-- [#44293](https://github.com/vllm-project/vllm/pull/44293) Nit Changes in Tiered KV Offload — @rshavitt → `nan`
-- [#44352](https://github.com/vllm-project/vllm/pull/44352) [CI] Add missing vllm/parser/ CI trigger and fix test_parse.py  — @sfeng33 → `nan`
-- [#44042](https://github.com/vllm-project/vllm/pull/44042) [CI] Reject out-of-vocabulary  before they reach the GPU logprob path — @AndreasKaratzas → `nan`
-- [#44369](https://github.com/vllm-project/vllm/pull/44369) [ROCm][CI] Skip fp8 reload tests on gfx90a (MI250) — @JartX → `nan`
-- _…and 182 more_
+- _…and 177 more_
 
 </details>
