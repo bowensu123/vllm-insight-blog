@@ -8,10 +8,15 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (237)
+## PRs merged this window (232)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#34894](https://github.com/vllm-project/vllm/pull/34894) [DOC] Add INT8 W4A8 docs and Arm's supported quantization schemes — @fadara01 → `nan`
+- [#44436](https://github.com/vllm-project/vllm/pull/44436) [ROCm][CI] Add test for Aiter unified attn kernel — @divakar-amd → `nan`
+- [#44057](https://github.com/vllm-project/vllm/pull/44057) [Bugfix] Reject non-positive values for ParallelConfig int knobs — @jwzheng96 → `nan`
+- [#44363](https://github.com/vllm-project/vllm/pull/44363) [Core] Freeze garbage collector in workers after model initialization — @tlrmchlsmth → `nan`
+- [#44509](https://github.com/vllm-project/vllm/pull/44509) [Bugfix] MiniCPM-V-4.6 video inference crash: placeholder count mismatches visual embedding count — @tc-mb → `nan`
 - [#43519](https://github.com/vllm-project/vllm/pull/43519) Add model support for granite speech plus — @zvik → `nan`
 - [#44340](https://github.com/vllm-project/vllm/pull/44340) [Quant] Support compressed-tensors WNA8O8Int linears and WNInt embeddings — @mgoin → `nan`
 - [#43827](https://github.com/vllm-project/vllm/pull/43827) [DSv4] Adding TRTLLM gen attention kernel — @zyongye → `nan`
@@ -67,11 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43759](https://github.com/vllm-project/vllm/pull/43759) [XPU]fallback to TRITON_ATTN for vit attn on xpu when use float32 dtype — @yma11 → `nan`
 - [#44348](https://github.com/vllm-project/vllm/pull/44348) [Bugfix] Fix unstreamed tool call args dropped in Responses API streaming — @sfeng33 → `nan`
 - [#44347](https://github.com/vllm-project/vllm/pull/44347) [Bugfix] Update TrtLLM MoE routing methods — @wzhao18 → `nan`
-- [#44388](https://github.com/vllm-project/vllm/pull/44388) [Doc] Update ViT CUDA graph interfaces — @shen-shanshan → `nan`
-- [#44311](https://github.com/vllm-project/vllm/pull/44311) [Rust Frontend] Fix several hf chat template rendering issues — @BugenZhao → `nan`
-- [#43778](https://github.com/vllm-project/vllm/pull/43778) [Rust Frontend] Add dynamic LoRA endpoints — @Xunzhuo → `nan`
-- [#43774](https://github.com/vllm-project/vllm/pull/43774) [Rust Frontend] Add server router extension hook — @NolanHo → `nan`
-- [#44287](https://github.com/vllm-project/vllm/pull/44287) [KV Offloading] Enable HMA models for Tiering Offloading — @varun-sundar-rabindranath → `nan`
-- _…and 177 more_
+- _…and 172 more_
 
 </details>
