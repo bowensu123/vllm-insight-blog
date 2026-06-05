@@ -8,10 +8,12 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.1`](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) — 2026-06-05 10:10 UTC
 
-## PRs merged this window (226)
+## PRs merged this window (219)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44666](https://github.com/vllm-project/vllm/pull/44666) Male Mergify comment less spammy — @hmellor → `nan`
+- [#44330](https://github.com/vllm-project/vllm/pull/44330) [Bugfix] GPT-OSS instruction rendering — @yzong-rh → `nan`
 - [#44621](https://github.com/vllm-project/vllm/pull/44621) Upgrade tpu-inference to v0.21.0 — @CienetStingLin → `nan`
 - [#38804](https://github.com/vllm-project/vllm/pull/38804) Fix sarvam forward compatibility with transformers v5 — @Vikrantpalle → `nan`
 - [#44648](https://github.com/vllm-project/vllm/pull/44648) [Bugfix] [ROCm] [Critical] fallback to regular abi for ROCm — @tjtanaa → `nan`
@@ -70,8 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#42646](https://github.com/vllm-project/vllm/pull/42646) [perf] Add gemma RMS AR fusion — @jiahanc → `v0.22.1`
 - [#44493](https://github.com/vllm-project/vllm/pull/44493) [Bugfix]Fix Kimi-K2.5 FlashInfer ViT metadata — @Kevin-XiongC → `v0.22.1`
 - [#43447](https://github.com/vllm-project/vllm/pull/43447) [Prefix Caching] DeepSeekv4 - Support selective prefix-cache retention for sliding-window KV cache — @wzhao18 → `v0.22.1`
-- [#44497](https://github.com/vllm-project/vllm/pull/44497) [CI] Reverted gitignore changes — @AndreasKaratzas → `v0.22.1`
-- [#44479](https://github.com/vllm-project/vllm/pull/44479) [Frontend] Consolidate online serving utils. — @noooop → `v0.22.1`
-- _…and 166 more_
+- _…and 159 more_
 
 </details>
