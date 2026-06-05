@@ -8,10 +8,13 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.1`](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) — 2026-06-05 10:10 UTC
 
-## PRs merged this window (224)
+## PRs merged this window (226)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44621](https://github.com/vllm-project/vllm/pull/44621) Upgrade tpu-inference to v0.21.0 — @CienetStingLin → `nan`
+- [#38804](https://github.com/vllm-project/vllm/pull/38804) Fix sarvam forward compatibility with transformers v5 — @Vikrantpalle → `nan`
+- [#44648](https://github.com/vllm-project/vllm/pull/44648) [Bugfix] [ROCm] [Critical] fallback to regular abi for ROCm — @tjtanaa → `nan`
 - [#41968](https://github.com/vllm-project/vllm/pull/41968) Add objectstore as a secondary tier to multi-tier kv cache offloading — @effi-ofer → `nan`
 - [#44609](https://github.com/vllm-project/vllm/pull/44609) Support MiniCPMV batched preprocessing — @yma11 → `nan`
 - [#44647](https://github.com/vllm-project/vllm/pull/44647) [CI] Bump mypy version `1.19.1` -> `1.20.2` — @hmellor → `nan`
@@ -69,9 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#43447](https://github.com/vllm-project/vllm/pull/43447) [Prefix Caching] DeepSeekv4 - Support selective prefix-cache retention for sliding-window KV cache — @wzhao18 → `v0.22.1`
 - [#44497](https://github.com/vllm-project/vllm/pull/44497) [CI] Reverted gitignore changes — @AndreasKaratzas → `v0.22.1`
 - [#44479](https://github.com/vllm-project/vllm/pull/44479) [Frontend] Consolidate online serving utils. — @noooop → `v0.22.1`
-- [#42129](https://github.com/vllm-project/vllm/pull/42129) [Inductor] Fast-path Inductor fallback for vllm::*/vllm_aiter::* custom ops — @okorzh-amd → `v0.22.1`
-- [#44463](https://github.com/vllm-project/vllm/pull/44463) [CI] Resolve release V2 docker build after ROCm CI wheels change — @AndreasKaratzas → `v0.22.1`
-- [#41633](https://github.com/vllm-project/vllm/pull/41633) [EPLB] Nixl communicator optimization. Zero-copy transfers — @ilmarkov → `v0.22.1`
-- _…and 164 more_
+- _…and 166 more_
 
 </details>
