@@ -8,10 +8,18 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.1`](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) — 2026-06-05 10:10 UTC
 
-## PRs merged this window (221)
+## PRs merged this window (224)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#41968](https://github.com/vllm-project/vllm/pull/41968) Add objectstore as a secondary tier to multi-tier kv cache offloading — @effi-ofer → `nan`
+- [#44609](https://github.com/vllm-project/vllm/pull/44609) Support MiniCPMV batched preprocessing — @yma11 → `nan`
+- [#44647](https://github.com/vllm-project/vllm/pull/44647) [CI] Bump mypy version `1.19.1` -> `1.20.2` — @hmellor → `nan`
+- [#44635](https://github.com/vllm-project/vllm/pull/44635) Speed up docs build — @hmellor → `nan`
+- [#44649](https://github.com/vllm-project/vllm/pull/44649) [CI] Bump mistral-common — @hmellor → `nan`
+- [#44588](https://github.com/vllm-project/vllm/pull/44588) [Reasoning][Structured Outputs] Add Command A plus tags for structural tags — @rishitdholakia13 → `nan`
+- [#44561](https://github.com/vllm-project/vllm/pull/44561) [DSV4] Move more ops out of eager breakpoint — @WoosukKwon → `nan`
+- [#44615](https://github.com/vllm-project/vllm/pull/44615) [Bugfix] Fix gemma4 crash on CPU: guard mem_get_info call — @adhithyamulticoreware → `nan`
 - [#43167](https://github.com/vllm-project/vllm/pull/43167) Remove KV cache scale boilerplate from model weight loading methods — @hmellor → `nan`
 - [#43150](https://github.com/vllm-project/vllm/pull/43150) [BUG] Fix FP64 Gumbel precision coverage — @tianyu-z → `nan`
 - [#44591](https://github.com/vllm-project/vllm/pull/44591) [Rust Frontend] Batch auto-abort requests by engine — @HueCodes → `v0.22.1`
@@ -64,14 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#42129](https://github.com/vllm-project/vllm/pull/42129) [Inductor] Fast-path Inductor fallback for vllm::*/vllm_aiter::* custom ops — @okorzh-amd → `v0.22.1`
 - [#44463](https://github.com/vllm-project/vllm/pull/44463) [CI] Resolve release V2 docker build after ROCm CI wheels change — @AndreasKaratzas → `v0.22.1`
 - [#41633](https://github.com/vllm-project/vllm/pull/41633) [EPLB] Nixl communicator optimization. Zero-copy transfers — @ilmarkov → `v0.22.1`
-- [#44230](https://github.com/vllm-project/vllm/pull/44230) optimize the compressor 128 split cutedsl kernel  — @Jie-Fang → `v0.22.1`
-- [#41471](https://github.com/vllm-project/vllm/pull/41471) [Refactor] Remove dead code in tests and parallel_state — @yewentao256 → `v0.22.1`
-- [#41759](https://github.com/vllm-project/vllm/pull/41759) [MM][Perf][CG] Support ViT full CUDA graph for InternVL — @oguzhankir → `v0.22.1`
-- [#42865](https://github.com/vllm-project/vllm/pull/42865) [KV Connector] Update lmcache kv_offloading_backend to use LMCacheMPConnector — @maobaolong → `v0.22.1`
-- [#44410](https://github.com/vllm-project/vllm/pull/44410) [Bugfix] Fix VLLMNotFoundError when using LoRA adapter name in poolin… — @wanghenshui → `v0.22.1`
-- [#43241](https://github.com/vllm-project/vllm/pull/43241) [Model Runner V2][Spec Decode] Add Gemma4 MTP support — @TheEpicDolphin → `v0.22.1`
-- [#44289](https://github.com/vllm-project/vllm/pull/44289) [XPU] skip unapplied UT in test_gpu_model_runner.py — @yma11 → `v0.22.1`
-- [#43982](https://github.com/vllm-project/vllm/pull/43982) [Bugfix] Fix Gemma4 MTP block_table batch_size mismatch under concurrent load — @Dymasik → `v0.22.1`
-- _…and 161 more_
+- _…and 164 more_
 
 </details>
