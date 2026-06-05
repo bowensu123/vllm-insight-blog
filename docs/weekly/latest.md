@@ -8,10 +8,21 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (223)
+## PRs merged this window (224)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44066](https://github.com/vllm-project/vllm/pull/44066) docs: fix tokenizer optimization typo — @chunyang-wen → `nan`
+- [#43874](https://github.com/vllm-project/vllm/pull/43874) [NixlConnector] Initiate deprecation cycle for `kv_both` role  — @NickLucche → `nan`
+- [#44391](https://github.com/vllm-project/vllm/pull/44391) [Rust Frontend] Support include_reasoning=false — @ricky-chaoju → `nan`
+- [#44622](https://github.com/vllm-project/vllm/pull/44622) [Bugfix] Update mistral tokenizer test for continue_final_message fix — @XuZhou26 → `nan`
+- [#44603](https://github.com/vllm-project/vllm/pull/44603) fix: pad dummy run query_start_loc — @UranusSeven → `nan`
+- [#44618](https://github.com/vllm-project/vllm/pull/44618) [Bugfix] Fix test_invocations flaky failure with newer openai SDK — @XuZhou26 → `nan`
+- [#44620](https://github.com/vllm-project/vllm/pull/44620) [Bugfix][Rust Frontend] Fix UTF-8 char-boundary panic in incremental detokenizer — @Sunt-ing → `nan`
+- [#44617](https://github.com/vllm-project/vllm/pull/44617) Fix `LLM.wait_for_completion` output type docstring — @viiccwen → `nan`
+- [#41002](https://github.com/vllm-project/vllm/pull/41002) [ROCm][perf] Use workspace manager for sparse indexer allocations — @tuukkjs → `nan`
+- [#40426](https://github.com/vllm-project/vllm/pull/40426) [ROCM] [FEAT] Integrate Aiter hipBLASLt GEMM online tuning — @hanlin12-AMD → `nan`
+- [#44605](https://github.com/vllm-project/vllm/pull/44605) [CI/Build] Disable CPU-Compatibility Tests — @bigPYJ1151 → `nan`
 - [#43720](https://github.com/vllm-project/vllm/pull/43720) [KVConnector][1/N] PP-aware handshake aggregation and intermediate-PP output plumbing — @zixi-qi → `nan`
 - [#44571](https://github.com/vllm-project/vllm/pull/44571) [Bugfix] Exclude vision embedder from quantization in Gemma4 Unified — @lucianommartins → `nan`
 - [#44569](https://github.com/vllm-project/vllm/pull/44569) [DSV4] Refactor DeepseekV4Attention — @WoosukKwon → `nan`
@@ -61,17 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#35078](https://github.com/vllm-project/vllm/pull/35078) Bump actions/stale from 10.1.1 to 10.3.0 — @dependabot[bot] → `nan`
 - [#44442](https://github.com/vllm-project/vllm/pull/44442) [Minor] Remove FlashInfer version check in topk_topp_sampler — @WoosukKwon → `nan`
 - [#44253](https://github.com/vllm-project/vllm/pull/44253) [Bug Fix][Model Runner V2][Spec Decode] Warmup & capture with different attention states for speculator prefill — @TheEpicDolphin → `nan`
-- [#42752](https://github.com/vllm-project/vllm/pull/42752) [Bugfix] Honor tool_choice="none" in Chat Completions streaming — @hoobnn → `nan`
-- [#42453](https://github.com/vllm-project/vllm/pull/42453) [Feature] Support batch invariant rms norm with residual — @yewentao256 → `nan`
-- [#44429](https://github.com/vllm-project/vllm/pull/44429) [Model] Add Gemma4 Unified (encoder-free)  support — @lucianommartins → `nan`
-- [#44413](https://github.com/vllm-project/vllm/pull/44413) [LoRA] Fix dedup for post-replacement module aliases — @linitra24 → `nan`
-- [#44122](https://github.com/vllm-project/vllm/pull/44122) [Refactor] Remove dead code fp quant — @yewentao256 → `nan`
-- [#44370](https://github.com/vllm-project/vllm/pull/44370) [ROCm][CI] Move Model Executor test step from MI250 to MI300 (gfx942) — @JartX → `nan`
-- [#44365](https://github.com/vllm-project/vllm/pull/44365) [10b/n] Migrate custom all-reduce, DeepSeek V4 fused MLA, MiniMax reduce-RMS, and MXFP8 MoE to libtorch stable ABI — @cleonard530 → `nan`
-- [#43659](https://github.com/vllm-project/vllm/pull/43659) Handle spinloop ext load failure gracefully — @pschlan-amd → `nan`
-- [#44207](https://github.com/vllm-project/vllm/pull/44207) fix(config): validate max_num_scheduled_tokens >= 0 on all paths — @Oxygen56 → `nan`
-- [#37505](https://github.com/vllm-project/vllm/pull/37505) [KVCache] Support Pluggable KVCacheSpec — @MengqingCao → `nan`
-- [#44174](https://github.com/vllm-project/vllm/pull/44174) [CI] Align PD tests to HMA on by default — @NickLucche → `nan`
-- _…and 163 more_
+- _…and 164 more_
 
 </details>
