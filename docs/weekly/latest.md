@@ -12,6 +12,7 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44435](https://github.com/vllm-project/vllm/pull/44435) [Doc] Add Llama-3.2-3B-Instruct to batch-invariance tested models — @DaoyuanLi2816 → `nan`
 - [#42832](https://github.com/vllm-project/vllm/pull/42832) [ROCm][GPT-OSS] Fuse RoPE + static Q FP8 quant on fused RoPE+KV path — @akii96 → `nan`
 - [#44669](https://github.com/vllm-project/vllm/pull/44669) [Core][Engine] allow DP ray placement groups to be set on specific nodes — @walterbm → `nan`
 - [#44666](https://github.com/vllm-project/vllm/pull/44666) Male Mergify comment less spammy — @hmellor → `nan`
@@ -71,7 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#42443](https://github.com/vllm-project/vllm/pull/42443) Refactor CT NVFP4 linear to use a single class — @dsikka → `v0.22.1`
 - [#44205](https://github.com/vllm-project/vllm/pull/44205) [Bugfix] fix EVS for qwen3-vl — @garrygale → `v0.22.1`
 - [#43556](https://github.com/vllm-project/vllm/pull/43556) [Attention] Mamba attention module refactor - LINEAR — @wangxiyuan → `v0.22.1`
-- [#42646](https://github.com/vllm-project/vllm/pull/42646) [perf] Add gemma RMS AR fusion — @jiahanc → `v0.22.1`
 - _…and 158 more_
 
 </details>
