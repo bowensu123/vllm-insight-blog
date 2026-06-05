@@ -8,10 +8,12 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.1`](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) — 2026-06-05 10:10 UTC
 
-## PRs merged this window (219)
+## PRs merged this window (218)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#42832](https://github.com/vllm-project/vllm/pull/42832) [ROCm][GPT-OSS] Fuse RoPE + static Q FP8 quant on fused RoPE+KV path — @akii96 → `nan`
+- [#44669](https://github.com/vllm-project/vllm/pull/44669) [Core][Engine] allow DP ray placement groups to be set on specific nodes — @walterbm → `nan`
 - [#44666](https://github.com/vllm-project/vllm/pull/44666) Male Mergify comment less spammy — @hmellor → `nan`
 - [#44330](https://github.com/vllm-project/vllm/pull/44330) [Bugfix] GPT-OSS instruction rendering — @yzong-rh → `nan`
 - [#44621](https://github.com/vllm-project/vllm/pull/44621) Upgrade tpu-inference to v0.21.0 — @CienetStingLin → `nan`
@@ -70,8 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#44205](https://github.com/vllm-project/vllm/pull/44205) [Bugfix] fix EVS for qwen3-vl — @garrygale → `v0.22.1`
 - [#43556](https://github.com/vllm-project/vllm/pull/43556) [Attention] Mamba attention module refactor - LINEAR — @wangxiyuan → `v0.22.1`
 - [#42646](https://github.com/vllm-project/vllm/pull/42646) [perf] Add gemma RMS AR fusion — @jiahanc → `v0.22.1`
-- [#44493](https://github.com/vllm-project/vllm/pull/44493) [Bugfix]Fix Kimi-K2.5 FlashInfer ViT metadata — @Kevin-XiongC → `v0.22.1`
-- [#43447](https://github.com/vllm-project/vllm/pull/43447) [Prefix Caching] DeepSeekv4 - Support selective prefix-cache retention for sliding-window KV cache — @wzhao18 → `v0.22.1`
-- _…and 159 more_
+- _…and 158 more_
 
 </details>
