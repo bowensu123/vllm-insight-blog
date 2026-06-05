@@ -8,10 +8,15 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 
 - [`v0.22.0`](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — 2026-05-29 10:28 UTC
 
-## PRs merged this window (227)
+## PRs merged this window (223)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#43720](https://github.com/vllm-project/vllm/pull/43720) [KVConnector][1/N] PP-aware handshake aggregation and intermediate-PP output plumbing — @zixi-qi → `nan`
+- [#44571](https://github.com/vllm-project/vllm/pull/44571) [Bugfix] Exclude vision embedder from quantization in Gemma4 Unified — @lucianommartins → `nan`
+- [#44569](https://github.com/vllm-project/vllm/pull/44569) [DSV4] Refactor DeepseekV4Attention — @WoosukKwon → `nan`
+- [#44334](https://github.com/vllm-project/vllm/pull/44334) [10/n] Migrate cuda_view and silu_and_mul_per_block_quant kernels to torch stale ABI. — @cleonard530 → `nan`
+- [#42139](https://github.com/vllm-project/vllm/pull/42139) [XPU][MoE] support block_fp8_moe on xpu — @zufangzhu → `nan`
 - [#44500](https://github.com/vllm-project/vllm/pull/44500) [Rust Frontend] Skip loading multimodal processor if `--language-model-only` is specified — @BugenZhao → `nan`
 - [#43926](https://github.com/vllm-project/vllm/pull/43926) fix: keep DeepSeek V4 RoPE cache on inv_freq device — @galletas1712 → `nan`
 - [#44539](https://github.com/vllm-project/vllm/pull/44539) [mamba] unify KDA conv states into one cache to match 2-state SSM layout — @ZJY0516 → `nan`
@@ -67,11 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#44207](https://github.com/vllm-project/vllm/pull/44207) fix(config): validate max_num_scheduled_tokens >= 0 on all paths — @Oxygen56 → `nan`
 - [#37505](https://github.com/vllm-project/vllm/pull/37505) [KVCache] Support Pluggable KVCacheSpec — @MengqingCao → `nan`
 - [#44174](https://github.com/vllm-project/vllm/pull/44174) [CI] Align PD tests to HMA on by default — @NickLucche → `nan`
-- [#44425](https://github.com/vllm-project/vllm/pull/44425) [CI/Build] Fix LoRA testing — @jeejeelee → `nan`
-- [#42472](https://github.com/vllm-project/vllm/pull/42472) [Model Runner V2] Use FlashInfer sampler — @njhill → `nan`
-- [#43590](https://github.com/vllm-project/vllm/pull/43590) [Frontend][Responses API] Fold developer-role input messages into system instructions — @chaunceyjiang → `nan`
-- [#44346](https://github.com/vllm-project/vllm/pull/44346) [Refactor] Suppress SyntaxWarning from ast.literal_eval in tool parsers — @sfeng33 → `nan`
-- [#39968](https://github.com/vllm-project/vllm/pull/39968) [XPU] Add XPU block-scaled W8A8 fp8 path — @xwu-intel → `nan`
-- _…and 167 more_
+- _…and 163 more_
 
 </details>
