@@ -3,69 +3,72 @@
 _Window: last 7 days · upstream: [vllm-project/vllm](https://github.com/vllm-project/vllm)_
 
 ## TL;DR
-This week’s [v0.22.1](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) patch release focuses heavily on stabilizing and optimizing the newly introduced DeepSeek-V4 architecture, alongside significant maturation of the NIXL KV-connector for disaggregated serving. Hardware support saw a notable boost for AMD Zen CPUs via ZenTorch kernels, while the Rust frontend and Model Runner V2 continue to absorb core serving responsibilities. Overall, it’s a highly practical release for teams pushing the limits of long-context offloading, MoE routing, and multi-node Ray deployments.
+This week’s [v0.22.1](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) patch release focuses heavily on maturing the Model Runner V2 (MRV2) execution engine, expanding DeepSeek-V4 optimizations, and hardening disaggregated prefill/decode (PD) infrastructure. We also saw significant hardware-specific wins, including zentorch kernel routing for AMD Zen CPUs and substantial ROCm/Intel XPU backend stabilization. If you are deploying DeepSeek-V4, testing the V2 engine, or building multi-tier KV cache offloading for PD, this update is highly relevant.
 
 ## Deep dives
 
-### DeepSeek-V4 Architecture Integration and Optimizations
-DeepSeek-V4 introduces a novel attention mechanism and a "Mega MoE" (Mixture of Experts) architecture that requires specialized routing and kernel support to run efficiently. This week saw a massive integration push, adding the TRTLLM generation attention kernel ([#43827](https://github.com/vllm-project/vllm/pull/43827)), optimizing sparse FP8 compressor kernels ([#44161](https://github.com/vllm-project/vllm/pull/44161)), and implementing Expert Parallelism Load Balancing (EPLB) for the Mega MoE ([#43339](https://github.com/vllm-project/vllm/pull/43339)), alongside critical initialization fixes ([#44236](https://github.com/vllm-project/vllm/pull/44236)). Without these specialized kernels and routing logic, DSV4 either fails to initialize or suffers from severe performance bottlenecks during generation. Engineers deploying DeepSeek-V4 on NVIDIA GPUs should upgrade to leverage these performance unlocks and ensure stable model loading.
+### DeepSeek-V4 Architecture Optimizations
+DeepSeek-V4 relies on Multi-head Latent Attention (MLA) and massive Mixture-of-Experts (MoE) layers, which historically strain standard inference engines due to unique memory and routing patterns. This week, vLLM integrated TRT-LLM generation attention kernels specifically for DSV4 ([#43827](https://github.com/vllm-project/vllm/pull/43827)), added Expert Parallelism Load Balancing (EPLB) for its MegaMoE layers ([#43339](https://github.com/vllm-project/vllm/pull/43339)), and implemented selective prefix-cache retention for its sliding window attention ([#43447](https://github.com/vllm-project/vllm/pull/43447)). These changes drastically reduce KV cache memory overhead and improve token generation throughput by optimizing the exact bottlenecks DSV4 exhibits at scale. Teams deploying DSV4 on multi-GPU clusters should upgrade to leverage these targeted performance and memory wins.
 
-### Multi-Tier KV Cache Offloading and NIXL Maturation
-KV cache offloading moves inactive context blocks from GPU VRAM to slower memory tiers (CPU, disk, or object storage) to prevent OOM errors during long-context or high-concurrency serving, while NIXL is vLLM's KV transfer library used for Prefill-Decode (PD) disaggregation. The offloading subsystem now supports object stores as a secondary tier ([#41968](https://github.com/vllm-project/vllm/pull/41968)), while the NIXL connector gained PP-aware handshake aggregation ([#43720](https://github.com/vllm-project/vllm/pull/43720)) and zero-copy transfer optimizations ([#41633](https://github.com/vllm-project/vllm/pull/41633)). Expanding the memory hierarchy allows serving vastly longer contexts, and making NIXL aware of Pipeline Parallelism (PP) ensures disaggregated serving works correctly across multi-stage pipelines. Teams running long-context workloads, high-throughput serving, or PD disaggregated setups should test these new offloading tiers and NIXL configurations to maximize VRAM utilization.
+### Model Runner V2 Rolls Out to Dense Models
+Model Runner V2 (MRV2) is vLLM’s next-generation execution engine, designed to decouple scheduling from execution, eliminate Python-side bottlenecks, and natively support advanced features like speculative decoding. This week, MRV2 was officially enabled for Llama and Mistral dense models ([#43458](https://github.com/vllm-project/vllm/pull/43458)), integrated with the highly optimized FlashInfer sampler ([#42472](https://github.com/vllm-project/vllm/pull/42472)), and tuned to avoid pipeline parallel (PP) bubbles ([#42187](https://github.com/vllm-project/vllm/pull/42187)). This matters because it brings V2’s architectural latency and throughput improvements to the most widely deployed model families. Engineers testing the V1/V2 transition should monitor their Llama/Mistral workloads for improved PP scaling and sampling performance.
 
-### AMD Zen CPU Acceleration via ZenTorch
-Running LLMs on CPUs is typically bottlenecked by memory bandwidth and compute density, often relying on generic libraries like oneDNN that aren't fully optimized for specific microarchitectures. vLLM now routes W8A8 (int8 dynamic-symmetric) and W4A16 (GPTQ) linear inference through AMD's highly optimized ZenTorch kernels on Zen CPUs, with transparent fallback to oneDNN for other hardware ([#41813](https://github.com/vllm-project/vllm/pull/41813)). This unlocks significantly better performance for quantized models on AMD CPUs, making them a viable option for cost-effective or edge deployments without requiring GPUs. Users deploying vLLM on AMD EPYC or Ryzen CPUs should ensure they are using supported quantization formats (W8A8/W4A16) to automatically benefit from the ZenTorch speedups.
+### Maturing Disaggregated Serving with Multi-Tier KV Offloading
+Disaggregated prefill/decode (PD) separates compute-heavy prefill from memory-bound decode, requiring fast, reliable KV cache transfers between nodes without triggering out-of-memory (OOM) errors. vLLM significantly hardened this pipeline by introducing an object store as a secondary tier for KV cache offloading ([#41968](https://github.com/vllm-project/vllm/pull/41968)), adding zero-copy transfers to the NIXL communicator ([#41633](https://github.com/vllm-project/vllm/pull/41633)), and implementing a Triton fast-path for small CPU-to-GPU block swaps ([#42212](https://github.com/vllm-project/vllm/pull/42212)). This creates a robust fallback hierarchy (GPU VRAM -> CPU RAM -> Object Store) that prevents request drops during bursty traffic. Infrastructure teams building large-scale PD clusters will benefit from this increased resilience and transfer efficiency.
 
 ## Kernels & attention
-- Cutlass FP8 scaled MM bypasses padding for a 20% kernel performance improvement ([#43706](https://github.com/vllm-project/vllm/pull/43706)) — speeds up FP8 inference on Hopper/Ada.
-- Triton MoE backend is now used by default on Hopper GPUs ([#44220](https://github.com/vllm-project/vllm/pull/44220)) — simplifies deployment and improves MoE routing performance.
-- Fused RoPE and static Q FP8 quantization on the fused RoPE+KV path for ROCm ([#42832](https://github.com/vllm-project/vllm/pull/42832)) — reduces memory bandwidth overhead on AMD GPUs.
-- FlashAttention synced with upstream ([#44065](https://github.com/vllm-project/vllm/pull/44065)) — keeps vLLM aligned with the latest FA3/FA2 optimizations and bug fixes.
+- Optimized CUTLASS FP8 scaled matrix multiplication by bypassing padding ([#43706](https://github.com/vllm-project/vllm/pull/43706)) — yields a 20% kernel performance improvement for FP8 workloads.
+- Refactored the DeepSeek-V4 attention module ([#44569](https://github.com/vllm-project/vllm/pull/44569)) and optimized sparse FP8 compressor kernels ([#44161](https://github.com/vllm-project/vllm/pull/44161)) — cleans up the MLA implementation and speeds up sparse routing.
+- Added GELU_TANH activation support to CPU, CUTLASS, and WNA16 MoE backends ([#42027](https://github.com/vllm-project/vllm/pull/42027)) — expands compatibility for models using this specific gating function.
+- Applied a single-pass min_larger finding and binary search in the Triton Top-p sampling path ([#42191](https://github.com/vllm-project/vllm/pull/42191)) — reduces sampling overhead for large vocabularies.
 
 ## Quantization
-- Compressed-tensors now supports WNA8O8Int linears and WNInt embeddings ([#43440](https://github.com/vllm-project/vllm/pull/43440)) — expands the range of supported quantization formats.
-- ModelOpt MXFP8 non-gated MoE is now supported ([#42958](https://github.com/vllm-project/vllm/pull/42958)) — enables NVIDIA's microscaling FP8 format for Mixture-of-Experts models.
-- Asymmetric support added for MoE WNA16 Marlin ([#44025](https://github.com/vllm-project/vllm/pull/44025)) — allows more flexible weight quantization schemes for MoE layers.
-- XPU block-scaled W8A8 FP8 path added ([#39968](https://github.com/vllm-project/vllm/pull/39968)) — brings FP8 quantization support to Intel GPUs.
+- Enabled block-scaled W8A8 FP8 execution paths on Intel XPU ([#39968](https://github.com/vllm-project/vllm/pull/39968)) and added W4A16 support to FlashInfer B12x MoE experts ([#43332](https://github.com/vllm-project/vllm/pull/43332)) — broadens quantized inference across hardware.
+- Added asymmetric support for MoE WNA16 Marlin kernels via compressed-tensors ([#44025](https://github.com/vllm-project/vllm/pull/44025)) — allows more flexible weight quantization schemes for MoE models.
+- Supported ModelOpt MXFP8 non-gated MoE ([#42958](https://github.com/vllm-project/vllm/pull/42958)) and refactored CT NVFP4 linear classes ([#42443](https://github.com/vllm-project/vllm/pull/42443)) — streamlines deployment of NVIDIA's latest microscaling formats.
+- Routed W8A8 and W4A16 linear inference through zentorch kernels on AMD Zen CPUs ([#41813](https://github.com/vllm-project/vllm/pull/41813)) — provides transparent, hardware-accelerated quantized inference on x86.
 
 ## Parallelism & scheduling
-- Multi-node Ray data-parallel serving hang fixed by excluding the Ray DP backend from deferred port allocation ([#43864](https://github.com/vllm-project/vllm/pull/43864)) — resolves critical deadlocks in multi-node setups.
-- Pipeline parallel bubbles avoided in Model Runner V2 ([#42187](https://github.com/vllm-project/vllm/pull/42187)) — improves GPU utilization when using Pipeline Parallelism.
-- DP Ray placement groups can now be set on specific nodes ([#44669](https://github.com/vllm-project/vllm/pull/44669)) — gives finer control over resource allocation in Ray clusters.
-- Mamba prefix caching mode support added to the NIXL PD connector ([#42554](https://github.com/vllm-project/vllm/pull/42554)) — enables prefill-decode disaggregation for state-space models.
+- Added PP-aware handshake aggregation and intermediate-PP output plumbing to the KV connector ([#43720](https://github.com/vllm-project/vllm/pull/43720)) — ensures correct KV cache routing in multi-node pipeline parallel setups.
+- Threaded `scheduler_block_size` into the KVCacheManager and KVCacheCoordinator ([#44165](https://github.com/vllm-project/vllm/pull/44165)) — aligns block allocation logic across the scheduling stack.
+- Supported Pluggable `KVCacheSpec` ([#37505](https://github.com/vllm-project/vllm/pull/37505)) — allows custom KV cache layouts required for speculative decoding and hybrid SSM/Transformer models.
+- Snapshot `max_cudagraph_capture_size` into `FusedMoEConfig` ([#44613](https://github.com/vllm-project/vllm/pull/44613)) — prevents CUDA graph capture failures for large MoE models.
 
 ## Model support
-- Gemma4 Unified (encoder-free) support added ([#44429](https://github.com/vllm-project/vllm/pull/44429)) — brings native support for Google's latest multimodal architecture.
-- JetBrains' Mellum v2 code generation model added ([#43992](https://github.com/vllm-project/vllm/pull/43992)) — expands the roster of supported open-weights MoE coding models.
-- Gemma4 MTP (Multi-Token Prediction) support added to Model Runner V2 ([#43241](https://github.com/vllm-project/vllm/pull/43241)) — enables speculative decoding for Gemma4.
-- HyperCLOVAX loading fixed by registering the model type natively ([#43860](https://github.com/vllm-project/vllm/pull/43860)) — resolves breakages from upstream HuggingFace repo changes.
+- Added support for JetBrains' Mellum v2 ([#43992](https://github.com/vllm-project/vllm/pull/43992)) and Gemma4 Unified encoder-free models ([#44429](https://github.com/vllm-project/vllm/pull/44429)) — expands the roster of natively supported open-weights architectures.
+- Added Gemma4 Multi-Token Prediction (MTP) support in Model Runner V2 ([#43241](https://github.com/vllm-project/vllm/pull/43241)) — enables speculative decoding for the latest Gemma variants.
+- Fixed HyperCLOVAX loading by registering the model type natively ([#43860](https://github.com/vllm-project/vllm/pull/43860)) and vendored MiniCPMV/MiniCPMO processors ([#44282](https://github.com/vllm-project/vllm/pull/44282)) — resolves breakages from upstream HuggingFace `transformers` v5 changes.
+- Unified KDA conv states into one cache for Mamba models ([#44539](https://github.com/vllm-project/vllm/pull/44539)) and refactored the Mamba attention module ([#43556](https://github.com/vllm-project/vllm/pull/43556)) — aligns SSM state management with vLLM's 2-state layout.
 
 ## Hardware
-- AITER hipBLASLt GEMM online tuning integrated for ROCm ([#40426](https://github.com/vllm-project/vllm/pull/40426)) — automatically finds optimal GEMM configurations for AMD GPUs.
-- XPU Triton-based selective scan forward op for Mamba added ([#43421](https://github.com/vllm-project/vllm/pull/43421)) — accelerates SSM inference on Intel GPUs.
-- SHM communicator support enabled for PowerPC ([#43754](https://github.com/vllm-project/vllm/pull/43754)) — expands CPU-based distributed inference to Power architectures.
+- Integrated AITER hipBLASLt GEMM online tuning for ROCm ([#40426](https://github.com/vllm-project/vllm/pull/40426)) and fused RoPE with static Q FP8 quantization ([#42832](https://github.com/vllm-project/vllm/pull/42832)) — significantly boosts AMD GPU inference performance.
+- Added a Triton-based selective scan forward op for Intel XPU ([#43421](https://github.com/vllm-project/vllm/pull/43421)) and enabled RMSNorm/activation quant fusions ([#43968](https://github.com/vllm-project/vllm/pull/43968)) — closes the performance gap for SSMs and quantized models on Intel silicon.
+- Enabled shared memory (SHM) communicator support for PowerPC ([#43754](https://github.com/vllm-project/vllm/pull/43754)) — facilitates multi-process weight sharing on IBM Power architectures.
+- Standardized KV cache layout to "blocks first" on CPU ([#44393](https://github.com/vllm-project/vllm/pull/44393)) and enabled fused kernels for Gated Delta Networks ([#43534](https://github.com/vllm-project/vllm/pull/43534)) — optimizes memory access patterns and CPU execution for hybrid models.
 
 ## API & serving
-- Rust frontend now supports batch auto-aborting requests by engine ([#44591](https://github.com/vllm-project/vllm/pull/44591)) — improves resource reclamation when clients disconnect.
-- Tool calling unified behind a single `Parser.parse()` interface ([#44267](https://github.com/vllm-project/vllm/pull/44267)) — cleans up the codebase and standardizes tool-call extraction across models.
-- Responses API now folds developer-role input messages into system instructions ([#43590](https://github.com/vllm-project/vllm/pull/43590)) — aligns with OpenAI's latest API conventions for system prompts.
-- `tool_choice="none"` is now correctly honored in Chat Completions streaming ([#42752](https://github.com/vllm-project/vllm/pull/42752)) — fixes a bug where tools were still being called when explicitly disabled.
+- Migrated the `ResponsesParser` to a unified `Parser` interface ([#42977](https://github.com/vllm-project/vllm/pull/42977)) and consolidated reasoning/tool-call parsing ([#44267](https://github.com/vllm-project/vllm/pull/44267)) — simplifies the frontend codebase for structured outputs.
+- Added a Phi-4 mini JSON tool parser to the Rust frontend ([#44213](https://github.com/vllm-project/vllm/pull/44213)) and supported recursive tool parameter conversion ([#44299](https://github.com/vllm-project/vllm/pull/44299)) — improves tool-calling reliability for smaller models.
+- Honored `tool_choice="none"` in Chat Completions streaming ([#42752](https://github.com/vllm-project/vllm/pull/42752)) and folded developer-role messages into system instructions ([#43590](https://github.com/vllm-project/vllm/pull/43590)) — ensures stricter compliance with OpenAI API semantics.
+- Added dynamic LoRA endpoints ([#43778](https://github.com/vllm-project/vllm/pull/43778)) and a server router extension hook ([#43774](https://github.com/vllm-project/vllm/pull/43774)) to the Rust frontend — increases flexibility for custom routing and adapter management.
 
 ## Watch list
-- NIXL KV-connector `kv_both` role is entering a deprecation cycle ([#43874](https://github.com/vllm-project/vllm/pull/43874)) — users relying on this role for PD disaggregation should migrate to the new explicit prefill/decode roles.
-- FlashInfer JIT cache installation via `--extra-index-url` removed from Docker builds ([#44366](https://github.com/vllm-project/vllm/pull/44366)) — PyPI quarantine means users must rely on the bundled wheels or build from source.
-- Model Runner V2 is being enabled for Llama and Mistral dense models ([#43458](https://github.com/vllm-project/vllm/pull/43458)) — expect the V2 engine core to become the default for more architectures soon.
+- **NIXL `kv_both` Deprecation**: The `kv_both` role in `NixlConnector` is entering its deprecation cycle ([#43874](https://github.com/vllm-project/vllm/pull/43874)); teams using NIXL for KV transfers should update their configurations to use explicit prefill/decode roles.
+- **Transformers v5 Compatibility**: Multiple PRs ([#43860](https://github.com/vllm-project/vllm/pull/43860), [#44282](https://github.com/vllm-project/vllm/pull/44282), [#38804](https://github.com/vllm-project/vllm/pull/38804)) are patching model loading and processor vendoring to survive upstream HuggingFace `transformers` v5 breaking changes; expect more churn as the ecosystem migrates.
+- **FlashInfer JIT Cache Quarantine**: Docker builds had to stop using `--extra-index-url` for `flashinfer-jit-cache` due to PyPI quarantine issues ([#44366](https://github.com/vllm-project/vllm/pull/44366)); keep an eye on FlashInfer packaging if you build custom vLLM images.
 
 ## Releases this window
 
 - [`v0.22.1`](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) — 2026-06-05 10:10 UTC
 
-## PRs merged this window (218)
+## PRs merged this window (216)
 
 <details>
 <summary>Click to expand the raw list</summary>
 
 <ul>
+<li><a href="https://github.com/vllm-project/vllm/pull/44613">#44613</a> [Bugfix][MoE] Snapshot max_cudagraph_capture_size into FusedMoEConfig — @aoshen02</li>
+<li><a href="https://github.com/vllm-project/vllm/pull/44593">#44593</a> [Misc] Replaced asserts with proper exceptions to improve UX for pooling — @taneem-ibrahim</li>
 <li><a href="https://github.com/vllm-project/vllm/pull/44692">#44692</a> [Bugfix][Kernel] Fix mHC fused-RMSNorm big-fuse miscompile for hidden_size != 4096 — @zyongye</li>
 <li><a href="https://github.com/vllm-project/vllm/pull/44213">#44213</a> [Rust Frontend] Add Phi-4 mini JSON tool parser — @devin-lai</li>
 <li><a href="https://github.com/vllm-project/vllm/pull/44574">#44574</a> Preserve layout-changing clones — @mikekg</li>
@@ -124,8 +127,6 @@ Running LLMs on CPUs is typically bottlenecked by memory bandwidth and compute d
 <li><a href="https://github.com/vllm-project/vllm/pull/43827">#43827</a> [DSv4] Adding TRTLLM gen attention kernel — @zyongye → <code>v0.22.1</code></li>
 <li><a href="https://github.com/vllm-project/vllm/pull/44255">#44255</a> [ROCm][CI] Specifying time outs for the lm eval models — @AndreasKaratzas → <code>v0.22.1</code></li>
 <li><a href="https://github.com/vllm-project/vllm/pull/44046">#44046</a> [ROCm][CI] Stabilize memory-release in the Hybrid model generation tests — @AndreasKaratzas → <code>v0.22.1</code></li>
-<li><a href="https://github.com/vllm-project/vllm/pull/43625">#43625</a> [ROCm] Bump fastsafetensors to v0.3.2 from PyPI, remove git source build — @wjabbour → <code>v0.22.1</code></li>
-<li><a href="https://github.com/vllm-project/vllm/pull/42554">#42554</a> [PD][Nixl] Mamba prefix caching mode support  — @NickLucche → <code>v0.22.1</code></li>
-<li><em>…and 158 more</em></li>
+<li><em>…and 156 more</em></li>
 </ul>
 </details>
