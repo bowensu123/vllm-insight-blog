@@ -2,7 +2,7 @@ name: Daily sync & publish
 
 on:
   schedule:
-    - cron: "0 * * * *"   # every hour, top of the hour UTC
+    - cron: "0 */3 * * *"   # every 3 hours, top of the hour UTC
   workflow_dispatch:
     inputs:
       full:
@@ -16,6 +16,7 @@ permissions:
   pages: write
   id-token: write
   models: read
+  issues: write   # create the daily digest issue that GitHub emails to the assignee
 
 concurrency:
   group: vllm-insights-publish
@@ -115,49 +116,43 @@ jobs:
             echo "No digest changes to commit."
           fi
 
-      - name: Send weekly digest email
+      # Email the weekly digest via GitHub's own notification system: create an
+      # issue assigned to the repo owner. GitHub emails issue assignees, so the
+      # digest lands in the owner's GitHub notification inbox — no SMTP / external
+      # service needed. Set your GitHub account's notification email to
+      # subowen5@huawei.com (Settings → Emails / Notifications) to receive it there.
+      #
+      # The sync/build runs every 3h, but this step is gated to once per UTC day
+      # (a date sentinel persisted via actions/cache), so you get ~one email/24h.
+      - name: Email weekly digest via GitHub notification (once per 24h)
         env:
-          BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python - <<'PYEOF'
-          import os, sys, datetime, pathlib
-
-          api_key = os.getenv("BUTTONDOWN_API_KEY", "").strip()
-          if not api_key:
-              print("BUTTONDOWN_API_KEY not set; skipping email send")
-              sys.exit(0)
-
-          now = datetime.datetime.utcnow()
-          isoweek = now.strftime("%G-W%V")
-
-          # Sentinel file tracks which ISO week was last emailed.
-          # Stored alongside the SQLite DB (persisted via actions/cache).
-          sentinel = pathlib.Path("data/.last-emailed-week")
-          if sentinel.exists() and sentinel.read_text().strip() == isoweek:
-              print(f"Digest already sent for {isoweek}; skipping")
-              sys.exit(0)
-
-          digest_path = pathlib.Path("docs/weekly/latest.md")
-          if not digest_path.exists():
-              print("No digest found; skipping")
-              sys.exit(0)
-
-          import httpx
-          content = digest_path.read_text()
-          subject = f"vLLM Weekly — {isoweek}"
-
-          resp = httpx.post(
-              "https://api.buttondown.com/v1/emails",
-              headers={"Authorization": f"Token {api_key}"},
-              json={"subject": subject, "body": content, "status": "about_to_send"},
-              timeout=30,
-          )
-          resp.raise_for_status()
-          print(f"Digest sent OK (HTTP {resp.status_code}): {subject}")
-
-          sentinel.parent.mkdir(parents=True, exist_ok=True)
-          sentinel.write_text(isoweek)
-          PYEOF
+          TODAY=$(date -u +%Y-%m-%d)
+          SENTINEL=data/.last-emailed-day
+          if [ -f "$SENTINEL" ] && [ "$(cat "$SENTINEL")" = "$TODAY" ]; then
+            echo "Digest already emailed for $TODAY; skipping"
+            exit 0
+          fi
+          DIGEST=docs/weekly/latest.md
+          if [ ! -f "$DIGEST" ]; then
+            echo "No digest found; skipping"
+            exit 0
+          fi
+          # Create the issue assigned to the repo owner; the assignment fires a
+          # notification email containing the digest body. Then close it to keep
+          # the tracker clean (the email is already sent on creation).
+          if ISSUE_URL=$(gh issue create \
+               --title "📬 vLLM weekly digest — $TODAY" \
+               --body-file "$DIGEST" \
+               --assignee "${{ github.repository_owner }}"); then
+            echo "Created digest issue: $ISSUE_URL"
+            gh issue close "$ISSUE_URL" >/dev/null 2>&1 || true
+            mkdir -p data
+            echo "$TODAY" > "$SENTINEL"
+          else
+            echo "Issue create failed; not marking sentinel so it retries next run"
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

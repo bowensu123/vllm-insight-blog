@@ -59,12 +59,14 @@ def _open_watch_count(db_path: Path) -> int:
         any_row = conn.execute("SELECT 1 FROM issues LIMIT 1").fetchone()
         if not any_row:
             return 0
+        # Whole comma-delimited label tokens, not raw substrings, so labels like
+        # "test-regression" / "non-regression" don't inflate the count.
         row = conn.execute(
             """SELECT COUNT(*) AS n FROM issues
                WHERE state = 'OPEN' AND (
-                 labels LIKE '%release-blocker%' OR
-                 labels LIKE '%regression%' OR
-                 labels LIKE '%perf-regression%'
+                 (',' || REPLACE(labels, ', ', ',') || ',') LIKE '%,release-blocker,%' OR
+                 (',' || REPLACE(labels, ', ', ',') || ',') LIKE '%,regression,%' OR
+                 (',' || REPLACE(labels, ', ', ',') || ',') LIKE '%,perf-regression,%'
                )"""
         ).fetchone()
     return int(row["n"] or 0)
@@ -118,7 +120,10 @@ def _release_signals(db_path: Path, tag: str, published_at: str) -> dict:
             "AND published_at < ? ORDER BY published_at DESC LIMIT 1",
             (published_at,),
         ).fetchone()
-        since = prev["published_at"] if prev else published_at[:10]
+        # For the very first release there's no predecessor, so count everything
+        # merged up to it rather than collapsing the window to zero width (which
+        # made the first release always report 0 perf claims).
+        since = prev["published_at"] if prev else "1970-01-01T00:00:00+00:00"
 
         perf_n = conn.execute(
             "SELECT COUNT(DISTINCT pc.pr_number) AS n FROM perf_claims pc "
@@ -133,9 +138,19 @@ def _release_signals(db_path: Path, tag: str, published_at: str) -> dict:
             (tag,),
         ).fetchone()["n"] or 0
 
+        # Open regressions/blockers REPORTED IN THIS RELEASE'S WINDOW (since the
+        # previous release), not the whole-repo total — otherwise every release
+        # row showed the same constant. Match whole comma-delimited label tokens
+        # so "test-regression" / "non-regression" aren't miscounted as
+        # "regression".
         watch_n = conn.execute(
-            "SELECT COUNT(*) AS n FROM issues WHERE state = 'OPEN' AND ("
-            "labels LIKE '%regression%' OR labels LIKE '%release-blocker%')"
+            "SELECT COUNT(*) AS n FROM issues WHERE state = 'OPEN' "
+            "AND created_at >= ? AND ("
+            "  (',' || REPLACE(labels, ', ', ',') || ',') LIKE '%,regression,%' OR"
+            "  (',' || REPLACE(labels, ', ', ',') || ',') LIKE '%,perf-regression,%' OR"
+            "  (',' || REPLACE(labels, ', ', ',') || ',') LIKE '%,release-blocker,%'"
+            ")",
+            (since,),
         ).fetchone()["n"] or 0
 
     return {"perf_n": int(perf_n), "model_n": int(model_n), "watch_n": int(watch_n)}

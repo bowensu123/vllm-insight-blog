@@ -37,11 +37,11 @@ def _feature_slug(kind: str, name: str) -> str:
 
 
 def _gh_blob_url(repo: str, path: str, sha: str | None) -> str:
-    rev = sha or "main"
-    # `git/blob/{sha}` is permalink-y; if we only have main we use that.
-    if sha and len(sha) >= 7:
-        return f"https://github.com/{repo}/blob/main/{path}"
-    return f"https://github.com/{repo}/blob/main/{path}"
+    # Pin the link to the discovered commit SHA so it keeps pointing at the
+    # exact file we inventoried, even after upstream moves or deletes it.
+    # Fall back to `main` only when we don't have a usable SHA.
+    rev = sha if (sha and len(sha) >= 7) else "main"
+    return f"https://github.com/{repo}/blob/{rev}/{path}"
 
 
 def render_capability_matrix(db_path: Path, repo: str = "vllm-project/vllm") -> str:

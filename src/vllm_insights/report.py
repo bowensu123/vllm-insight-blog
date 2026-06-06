@@ -20,6 +20,39 @@ from pathlib import Path
 import pandas as pd
 
 from .analyzer.queries import releases_df, prs_df
+from .db import connect
+
+
+def _load_cached_digest(db_path: Path, key: str = "weekly") -> tuple[str, str] | None:
+    """Return (content, generated_at) of the last good digest, or None."""
+    try:
+        with connect(db_path) as conn:
+            row = conn.execute(
+                "SELECT content, generated_at FROM digest_cache WHERE key = ?",
+                (key,),
+            ).fetchone()
+    except Exception:
+        return None
+    if row and (row["content"] or "").strip():
+        return row["content"], row["generated_at"]
+    return None
+
+
+def _store_cached_digest(db_path: Path, content: str, key: str = "weekly") -> None:
+    """Persist a freshly generated good digest for future fallback."""
+    try:
+        with connect(db_path) as conn:
+            conn.execute(
+                """INSERT INTO digest_cache(key, content, generated_at)
+                   VALUES(?, ?, ?)
+                   ON CONFLICT(key) DO UPDATE SET
+                     content = excluded.content,
+                     generated_at = excluded.generated_at""",
+                (key, content, datetime.now(timezone.utc).isoformat()),
+            )
+    except Exception:
+        # Caching is best-effort; never let it break digest generation.
+        pass
 
 
 def generate_weekly_digest(
@@ -49,13 +82,30 @@ def generate_weekly_digest(
             digest = summarize_window(
                 db_path, days=days, model=llm_model,
                 backend=llm_backend, repo=repo, include_header=False,
-            )
-            lines += [digest.strip(), ""]
+            ).strip()
+            lines += [digest, ""]
+            # Remember this good generation so a future failure can fall back.
+            _store_cached_digest(db_path, digest)
         except Exception as e:
-            lines += [
-                f"_LLM digest skipped: {type(e).__name__}: {e}_",
-                "",
-            ]
+            # The LLM section IS the core value of this page. Rather than publish
+            # a digest whose insight section is just an error line, fall back to
+            # the most recent successful digest if we have one cached.
+            cached = _load_cached_digest(db_path)
+            if cached:
+                content, gen_at = cached
+                stamp = gen_at[:10]
+                lines += [
+                    f"> ℹ️ _Live summary unavailable ({type(e).__name__}); "
+                    f"showing the last successful digest from {stamp}._",
+                    "",
+                    content.strip(),
+                    "",
+                ]
+            else:
+                lines += [
+                    f"_LLM digest skipped: {type(e).__name__}: {e}_",
+                    "",
+                ]
 
     # ----- Releases that landed in the window -----
     rel = releases_df(db_path)
@@ -82,7 +132,8 @@ def generate_weekly_digest(
                 "",
             ]
             for _, p in recent.head(60).iterrows():
-                rel_tag = f" → `{p['release_tag']}`" if p.get("release_tag") else ""
+                rt = p.get("release_tag")
+                rel_tag = f" → `{rt}`" if pd.notna(rt) and rt else ""
                 lines += [
                     f"- [#{p['number']}]({p['url']}) {p['title']} "
                     f"— @{p['author']}{rel_tag}"

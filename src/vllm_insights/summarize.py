@@ -3,9 +3,10 @@
 Backends:
   - github   : GitHub Models inference API (uses GITHUB_TOKEN with models:read)
   - anthropic: Anthropic SDK (uses ANTHROPIC_API_KEY)
+  - bailian  : Alibaba Bailian / DashScope, OpenAI-compatible (uses DASHSCOPE_API_KEY)
 
-Pick via LLM_BACKEND env var or --backend flag. Defaults to "github" if GITHUB_TOKEN
-is present, else "anthropic".
+Pick via LLM_BACKEND env var or --backend flag. Auto-detection prefers DASHSCOPE_API_KEY
+(bailian), then ANTHROPIC_API_KEY (anthropic), then GITHUB_TOKEN (github).
 """
 import os
 import re
@@ -173,6 +174,8 @@ def _detect_backend(explicit: str | None) -> str:
     env = os.getenv("LLM_BACKEND", "").strip().lower()
     if env:
         return env
+    if os.getenv("DASHSCOPE_API_KEY", "").strip():
+        return "bailian"
     if os.getenv("ANTHROPIC_API_KEY", "").strip():
         return "anthropic"
     if os.getenv("GITHUB_TOKEN", "").strip():
@@ -218,9 +221,37 @@ def _call_anthropic(system: str, user: str, model: str) -> str:
     return "".join(b.text for b in resp.content if b.type == "text")
 
 
+def _call_bailian(system: str, user: str, model: str) -> str:
+    """Alibaba Bailian / DashScope via its OpenAI-compatible endpoint."""
+    api_key = os.getenv("DASHSCOPE_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("DASHSCOPE_API_KEY not set for bailian backend")
+    base_url = os.getenv(
+        "DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    ).rstrip("/")
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        "max_tokens": 2000,
+        "temperature": 0.3,
+    }
+    with httpx.Client(timeout=60.0) as c:
+        r = c.post(f"{base_url}/chat/completions", headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }, json=payload)
+        r.raise_for_status()
+        data = r.json()
+    return data["choices"][0]["message"]["content"]
+
+
 DEFAULT_MODELS = {
     "github": "openai/gpt-4o-mini",
     "anthropic": "claude-haiku-4-5",
+    "bailian": "qwen3.7-max",
 }
 
 
@@ -248,6 +279,8 @@ def summarize_window(
         text = _call_github_models(system, user_input, model)
     elif backend == "anthropic":
         text = _call_anthropic(system, user_input, model)
+    elif backend == "bailian":
+        text = _call_bailian(system, user_input, model)
     else:
         raise ValueError(f"Unknown backend: {backend}")
 
@@ -319,6 +352,8 @@ def summarize_release(
         text = _call_github_models(RELEASE_SYSTEM, user_input, model)
     elif backend == "anthropic":
         text = _call_anthropic(RELEASE_SYSTEM, user_input, model)
+    elif backend == "bailian":
+        text = _call_bailian(RELEASE_SYSTEM, user_input, model)
     else:
         raise ValueError(f"Unknown backend: {backend}")
 

@@ -283,6 +283,16 @@ CREATE TABLE IF NOT EXISTS hn_mentions (
     fetched_at    TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_hn_created ON hn_mentions(created_at);
+
+-- Last successfully generated LLM digest section, keyed by kind ('weekly').
+-- We persist every good generation so that if a later LLM call fails (rate
+-- limit, 5xx, missing key) we can fall back to the most recent good digest
+-- instead of publishing a page whose entire insight section is an error line.
+CREATE TABLE IF NOT EXISTS digest_cache (
+    key            TEXT PRIMARY KEY,     -- 'weekly'
+    content        TEXT NOT NULL,        -- the LLM digest markdown (no header)
+    generated_at   TEXT NOT NULL
+);
 """
 
 
