@@ -1,35 +1,38 @@
-# vLLM weekly digest — 2026-06-05 (W23)
+# vLLM weekly digest — 2026-06-06 (W23)
 
 _Window: last 7 days · upstream: [vllm-project/vllm](https://github.com/vllm-project/vllm)_
 
-_LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backend_
+_LLM digest skipped: RuntimeError: DASHSCOPE_API_KEY not set for bailian backend_
 
 ## Releases this window
 
 - [`v0.22.1`](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) — 2026-06-05 10:10 UTC
 
-## PRs merged this window (218)
+## PRs merged this window (216)
 
 <details><summary>Click to expand the raw list</summary>
 
-- [#44435](https://github.com/vllm-project/vllm/pull/44435) [Doc] Add Llama-3.2-3B-Instruct to batch-invariance tested models — @DaoyuanLi2816 → `nan`
-- [#42832](https://github.com/vllm-project/vllm/pull/42832) [ROCm][GPT-OSS] Fuse RoPE + static Q FP8 quant on fused RoPE+KV path — @akii96 → `nan`
-- [#44669](https://github.com/vllm-project/vllm/pull/44669) [Core][Engine] allow DP ray placement groups to be set on specific nodes — @walterbm → `nan`
-- [#44666](https://github.com/vllm-project/vllm/pull/44666) Male Mergify comment less spammy — @hmellor → `nan`
-- [#44330](https://github.com/vllm-project/vllm/pull/44330) [Bugfix] GPT-OSS instruction rendering — @yzong-rh → `nan`
-- [#44621](https://github.com/vllm-project/vllm/pull/44621) Upgrade tpu-inference to v0.21.0 — @CienetStingLin → `nan`
-- [#38804](https://github.com/vllm-project/vllm/pull/38804) Fix sarvam forward compatibility with transformers v5 — @Vikrantpalle → `nan`
-- [#44648](https://github.com/vllm-project/vllm/pull/44648) [Bugfix] [ROCm] [Critical] fallback to regular abi for ROCm — @tjtanaa → `nan`
-- [#41968](https://github.com/vllm-project/vllm/pull/41968) Add objectstore as a secondary tier to multi-tier kv cache offloading — @effi-ofer → `nan`
-- [#44609](https://github.com/vllm-project/vllm/pull/44609) Support MiniCPMV batched preprocessing — @yma11 → `nan`
-- [#44647](https://github.com/vllm-project/vllm/pull/44647) [CI] Bump mypy version `1.19.1` -> `1.20.2` — @hmellor → `nan`
-- [#44635](https://github.com/vllm-project/vllm/pull/44635) Speed up docs build — @hmellor → `nan`
-- [#44649](https://github.com/vllm-project/vllm/pull/44649) [CI] Bump mistral-common — @hmellor → `nan`
-- [#44588](https://github.com/vllm-project/vllm/pull/44588) [Reasoning][Structured Outputs] Add Command A plus tags for structural tags — @rishitdholakia13 → `nan`
-- [#44561](https://github.com/vllm-project/vllm/pull/44561) [DSV4] Move more ops out of eager breakpoint — @WoosukKwon → `nan`
-- [#44615](https://github.com/vllm-project/vllm/pull/44615) [Bugfix] Fix gemma4 crash on CPU: guard mem_get_info call — @adhithyamulticoreware → `nan`
-- [#43167](https://github.com/vllm-project/vllm/pull/43167) Remove KV cache scale boilerplate from model weight loading methods — @hmellor → `nan`
-- [#43150](https://github.com/vllm-project/vllm/pull/43150) [BUG] Fix FP64 Gumbel precision coverage — @tianyu-z → `nan`
+- [#44574](https://github.com/vllm-project/vllm/pull/44574) Preserve layout-changing clones — @mikekg
+- [#44130](https://github.com/vllm-project/vllm/pull/44130) [Bugfix] Fix `sequence_parallel_chunk_impl` custom op aliasing its input — @vadiklyutiy
+- [#44021](https://github.com/vllm-project/vllm/pull/44021) [Cohere] fix RoutingMethodType — @Terrencezzj
+- [#44435](https://github.com/vllm-project/vllm/pull/44435) [Doc] Add Llama-3.2-3B-Instruct to batch-invariance tested models — @DaoyuanLi2816
+- [#42832](https://github.com/vllm-project/vllm/pull/42832) [ROCm][GPT-OSS] Fuse RoPE + static Q FP8 quant on fused RoPE+KV path — @akii96
+- [#44669](https://github.com/vllm-project/vllm/pull/44669) [Core][Engine] allow DP ray placement groups to be set on specific nodes — @walterbm
+- [#44666](https://github.com/vllm-project/vllm/pull/44666) Male Mergify comment less spammy — @hmellor
+- [#44330](https://github.com/vllm-project/vllm/pull/44330) [Bugfix] GPT-OSS instruction rendering — @yzong-rh
+- [#44621](https://github.com/vllm-project/vllm/pull/44621) Upgrade tpu-inference to v0.21.0 — @CienetStingLin
+- [#38804](https://github.com/vllm-project/vllm/pull/38804) Fix sarvam forward compatibility with transformers v5 — @Vikrantpalle
+- [#44648](https://github.com/vllm-project/vllm/pull/44648) [Bugfix] [ROCm] [Critical] fallback to regular abi for ROCm — @tjtanaa
+- [#41968](https://github.com/vllm-project/vllm/pull/41968) Add objectstore as a secondary tier to multi-tier kv cache offloading — @effi-ofer
+- [#44609](https://github.com/vllm-project/vllm/pull/44609) Support MiniCPMV batched preprocessing — @yma11
+- [#44647](https://github.com/vllm-project/vllm/pull/44647) [CI] Bump mypy version `1.19.1` -> `1.20.2` — @hmellor
+- [#44635](https://github.com/vllm-project/vllm/pull/44635) Speed up docs build — @hmellor
+- [#44649](https://github.com/vllm-project/vllm/pull/44649) [CI] Bump mistral-common — @hmellor
+- [#44588](https://github.com/vllm-project/vllm/pull/44588) [Reasoning][Structured Outputs] Add Command A plus tags for structural tags — @rishitdholakia13
+- [#44561](https://github.com/vllm-project/vllm/pull/44561) [DSV4] Move more ops out of eager breakpoint — @WoosukKwon
+- [#44615](https://github.com/vllm-project/vllm/pull/44615) [Bugfix] Fix gemma4 crash on CPU: guard mem_get_info call — @adhithyamulticoreware
+- [#43167](https://github.com/vllm-project/vllm/pull/43167) Remove KV cache scale boilerplate from model weight loading methods — @hmellor
+- [#43150](https://github.com/vllm-project/vllm/pull/43150) [BUG] Fix FP64 Gumbel precision coverage — @tianyu-z
 - [#44591](https://github.com/vllm-project/vllm/pull/44591) [Rust Frontend] Batch auto-abort requests by engine — @HueCodes → `v0.22.1`
 - [#44066](https://github.com/vllm-project/vllm/pull/44066) docs: fix tokenizer optimization typo — @chunyang-wen → `v0.22.1`
 - [#43874](https://github.com/vllm-project/vllm/pull/43874) [NixlConnector] Initiate deprecation cycle for `kv_both` role  — @NickLucche → `v0.22.1`
@@ -69,9 +72,6 @@ _LLM digest skipped: RuntimeError: ANTHROPIC_API_KEY not set for anthropic backe
 - [#42554](https://github.com/vllm-project/vllm/pull/42554) [PD][Nixl] Mamba prefix caching mode support  — @NickLucche → `v0.22.1`
 - [#44476](https://github.com/vllm-project/vllm/pull/44476) [Bugfix][Compile] Guard per_token_group_fp8_quant lookup on non-CUDA platforms — @QiliangCui2023 → `v0.22.1`
 - [#44534](https://github.com/vllm-project/vllm/pull/44534) Add GH token to docs build pre run check — @hmellor → `v0.22.1`
-- [#42443](https://github.com/vllm-project/vllm/pull/42443) Refactor CT NVFP4 linear to use a single class — @dsikka → `v0.22.1`
-- [#44205](https://github.com/vllm-project/vllm/pull/44205) [Bugfix] fix EVS for qwen3-vl — @garrygale → `v0.22.1`
-- [#43556](https://github.com/vllm-project/vllm/pull/43556) [Attention] Mamba attention module refactor - LINEAR — @wangxiyuan → `v0.22.1`
-- _…and 158 more_
+- _…and 156 more_
 
 </details>
