@@ -35,19 +35,32 @@ def link_refs(text: str, repo: str) -> str:
 
 
 WEEKLY_SYSTEM = dedent("""
-    You are a release-notes editor for vLLM (a high-throughput LLM inference engine).
-    You will receive raw release notes and merged PRs from the past week. Produce a
-    theme-sliced digest for a vLLM-savvy engineer who is deciding what to track,
-    test or upgrade.
+    You are a senior vLLM engineer writing a teaching-oriented weekly digest for a
+    fellow engineer who wants to UNDERSTAND — not just see a list of — what changed
+    in vLLM (a high-throughput LLM inference engine) this week. You will receive raw
+    release notes and merged PRs from the past week. Explain the meaningful technical
+    updates: what they are, the concept behind them, why they matter, and who is
+    affected. Do not merely restate PR titles.
 
-    Output GitHub-flavored markdown. Use exactly these level-2 sections in this order;
-    OMIT any section that has nothing material this window (don't write "nothing this
-    week" — just leave the section out):
+    Output GitHub-flavored markdown. Use these level-2 sections in this order; OMIT
+    any section with nothing material this window (don't write "nothing this week" —
+    just leave the section out):
 
     ## TL;DR
     Two to four sentences of plain prose. What was the overall shape of the week — perf,
     model coverage, hardware, infra? Anyone who reads only this paragraph should know
     whether the week is worth investigating.
+
+    ## Deep dives
+    Pick the 2-4 MOST significant technical updates this window and teach each one.
+    Use a `### <short descriptive title>` per item, then 3-6 sentences that:
+      1. Briefly explain the underlying concept/background, so an engineer who doesn't
+         track this subsystem can follow (e.g. what MLA is, what chunked prefill does).
+      2. State concretely what changed, citing the PR inline as `#1234`.
+      3. Explain why it matters — the problem it solves or the win it unlocks.
+      4. Say who is affected and what, if anything, they should do (test, upgrade, tune
+         a flag). Be specific about hardware/model/workload when the source supports it.
+    Teach plainly; avoid hype. Only explain things actually present in the input.
 
     ## Kernels & attention
     1-4 bullets on FlashAttention/FlashInfer, MLA, Lightning Attention, custom CUDA kernels.
@@ -71,9 +84,15 @@ WEEKLY_SYSTEM = dedent("""
     1-3 bullets flagging RFCs / contentious threads / breaking changes worth following.
 
     Rules:
-    - Each bullet ≤ 1 line. No filler.
-    - Cite PRs as `#1234` inline. Don't fabricate numbers.
-    - Skip CI / lint / docs unless notable.
+    - In `## Deep dives`, prioritize understanding over brevity — full sentences, real
+      explanation. Do NOT repeat the same items verbatim in the theme sections below;
+      if an item is deep-dived, keep its theme bullet to a one-line pointer or omit it.
+    - In the theme sections, each bullet is ≤ 2 lines: state the change, then add a
+      short "— why it matters" clause when it isn't obvious. No filler.
+    - Cite PRs as `#1234` inline. NEVER fabricate PR numbers, models, features, or
+      benchmark figures — ground every claim in the provided notes/PRs. If a perf
+      number isn't in the source, describe the change qualitatively instead.
+    - Skip CI / lint / docs churn unless genuinely notable.
     - Place each PR under the single most-relevant theme; don't double-list.
 """).strip()
 
@@ -183,6 +202,12 @@ def _detect_backend(explicit: str | None) -> str:
     return "anthropic"
 
 
+# Output-token budget for a single LLM call. The teaching-oriented weekly digest
+# (TL;DR + Deep dives + theme sections) needs more room than the old terse list,
+# so this is generous; release summaries stay well under it.
+MAX_OUTPUT_TOKENS = 4000
+
+
 def _call_github_models(system: str, user: str, model: str) -> str:
     token = os.getenv("GITHUB_TOKEN", "").strip()
     if not token:
@@ -194,7 +219,7 @@ def _call_github_models(system: str, user: str, model: str) -> str:
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        "max_tokens": 2000,
+        "max_tokens": MAX_OUTPUT_TOKENS,
         "temperature": 0.3,
     }
     with httpx.Client(timeout=60.0) as c:
@@ -215,7 +240,7 @@ def _call_anthropic(system: str, user: str, model: str) -> str:
     from anthropic import Anthropic
     client = Anthropic(api_key=api_key)
     resp = client.messages.create(
-        model=model, max_tokens=2000, system=system,
+        model=model, max_tokens=MAX_OUTPUT_TOKENS, system=system,
         messages=[{"role": "user", "content": user}],
     )
     return "".join(b.text for b in resp.content if b.type == "text")
@@ -235,7 +260,7 @@ def _call_bailian(system: str, user: str, model: str) -> str:
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        "max_tokens": 2000,
+        "max_tokens": MAX_OUTPUT_TOKENS,
         "temperature": 0.3,
     }
     with httpx.Client(timeout=60.0) as c:
