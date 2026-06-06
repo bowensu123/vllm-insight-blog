@@ -81,8 +81,10 @@ jobs:
 
       - name: Weekly themed digest (LLM)
         env:
-          LLM_BACKEND: anthropic
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Alibaba Bailian / DashScope (OpenAI-compatible). Set DASHSCOPE_API_KEY
+          # in repo secrets. Model defaults to qwen3.7-max; override via LLM_MODEL.
+          LLM_BACKEND: bailian
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
         run: |
           mkdir -p docs/weekly
           vllm-insights digest --out docs/weekly/latest.md --days 7 --llm
@@ -93,8 +95,8 @@ jobs:
 
       - name: Summarize latest release (LLM, cached)
         env:
-          LLM_BACKEND: anthropic
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_BACKEND: bailian
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
         run: |
           vllm-insights summarize-release --tag latest || \
             echo "Release summary failed; continuing"
