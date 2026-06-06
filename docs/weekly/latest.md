@@ -2,16 +2,18 @@
 
 _Window: last 7 days · upstream: [vllm-project/vllm](https://github.com/vllm-project/vllm)_
 
-_LLM digest skipped: RuntimeError: DASHSCOPE_API_KEY not set for bailian backend_
+_LLM digest skipped: ReadTimeout: The read operation timed out_
 
 ## Releases this window
 
 - [`v0.22.1`](https://github.com/vllm-project/vllm/releases/tag/v0.22.1) — 2026-06-05 10:10 UTC
 
-## PRs merged this window (216)
+## PRs merged this window (218)
 
 <details><summary>Click to expand the raw list</summary>
 
+- [#44692](https://github.com/vllm-project/vllm/pull/44692) [Bugfix][Kernel] Fix mHC fused-RMSNorm big-fuse miscompile for hidden_size != 4096 — @zyongye
+- [#44213](https://github.com/vllm-project/vllm/pull/44213) [Rust Frontend] Add Phi-4 mini JSON tool parser — @devin-lai
 - [#44574](https://github.com/vllm-project/vllm/pull/44574) Preserve layout-changing clones — @mikekg
 - [#44130](https://github.com/vllm-project/vllm/pull/44130) [Bugfix] Fix `sequence_parallel_chunk_impl` custom op aliasing its input — @vadiklyutiy
 - [#44021](https://github.com/vllm-project/vllm/pull/44021) [Cohere] fix RoutingMethodType — @Terrencezzj
@@ -70,8 +72,6 @@ _LLM digest skipped: RuntimeError: DASHSCOPE_API_KEY not set for bailian backend
 - [#44046](https://github.com/vllm-project/vllm/pull/44046) [ROCm][CI] Stabilize memory-release in the Hybrid model generation tests — @AndreasKaratzas → `v0.22.1`
 - [#43625](https://github.com/vllm-project/vllm/pull/43625) [ROCm] Bump fastsafetensors to v0.3.2 from PyPI, remove git source build — @wjabbour → `v0.22.1`
 - [#42554](https://github.com/vllm-project/vllm/pull/42554) [PD][Nixl] Mamba prefix caching mode support  — @NickLucche → `v0.22.1`
-- [#44476](https://github.com/vllm-project/vllm/pull/44476) [Bugfix][Compile] Guard per_token_group_fp8_quant lookup on non-CUDA platforms — @QiliangCui2023 → `v0.22.1`
-- [#44534](https://github.com/vllm-project/vllm/pull/44534) Add GH token to docs build pre run check — @hmellor → `v0.22.1`
-- _…and 156 more_
+- _…and 158 more_
 
 </details>
