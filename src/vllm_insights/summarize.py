@@ -222,7 +222,8 @@ def _call_github_models(system: str, user: str, model: str) -> str:
         "max_tokens": MAX_OUTPUT_TOKENS,
         "temperature": 0.3,
     }
-    with httpx.Client(timeout=60.0) as c:
+    timeout = httpx.Timeout(float(os.getenv("LLM_TIMEOUT", "300")), connect=15.0)
+    with httpx.Client(timeout=timeout) as c:
         r = c.post(url, headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
@@ -263,7 +264,13 @@ def _call_bailian(system: str, user: str, model: str) -> str:
         "max_tokens": MAX_OUTPUT_TOKENS,
         "temperature": 0.3,
     }
-    with httpx.Client(timeout=60.0) as c:
+    # Qwen-max generating a multi-thousand-token teaching digest routinely takes
+    # longer than the old 60s read timeout, which surfaced as ReadTimeout and an
+    # empty digest. Give the read leg a generous budget (override via LLM_TIMEOUT).
+    timeout = httpx.Timeout(
+        float(os.getenv("LLM_TIMEOUT", "300")), connect=15.0
+    )
+    with httpx.Client(timeout=timeout) as c:
         r = c.post(f"{base_url}/chat/completions", headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",

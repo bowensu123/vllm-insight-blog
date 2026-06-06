@@ -15,6 +15,7 @@ The legacy `generate_daily_report` name is kept as an alias because the GH
 Actions workflow still calls it during the rollout.
 """
 from datetime import datetime, timedelta, timezone
+from html import escape
 from pathlib import Path
 
 import pandas as pd
@@ -125,22 +126,34 @@ def generate_weekly_digest(
         merged = prs.dropna(subset=["merged_at"])
         recent = merged[merged["merged_at"] >= since].sort_values("merged_at", ascending=False)
         if not recent.empty:
+            # Render the raw list as explicit HTML inside the <details> block.
+            # Markdown bullets placed inside a raw-HTML <details> are NOT reparsed
+            # by many renderers (GitHub issue emails, python-markdown without the
+            # md_in_html extension), which collapses every line into one unreadable
+            # blob. Emitting <ul><li> renders correctly everywhere.
             lines += [
                 f"## PRs merged this window ({len(recent)})",
                 "",
-                "<details><summary>Click to expand the raw list</summary>",
+                "<details>",
+                "<summary>Click to expand the raw list</summary>",
                 "",
+                "<ul>",
             ]
             for _, p in recent.head(60).iterrows():
                 rt = p.get("release_tag")
-                rel_tag = f" → `{rt}`" if pd.notna(rt) and rt else ""
-                lines += [
-                    f"- [#{p['number']}]({p['url']}) {p['title']} "
-                    f"— @{p['author']}{rel_tag}"
-                ]
+                rel_tag = (
+                    f" → <code>{escape(str(rt))}</code>"
+                    if pd.notna(rt) and rt else ""
+                )
+                title = escape(str(p["title"]))
+                author = escape(str(p["author"]))
+                lines.append(
+                    f'<li><a href="{escape(str(p["url"]))}">#{p["number"]}</a> '
+                    f"{title} — @{author}{rel_tag}</li>"
+                )
             if len(recent) > 60:
-                lines += [f"- _…and {len(recent) - 60} more_"]
-            lines += ["", "</details>", ""]
+                lines.append(f"<li><em>…and {len(recent) - 60} more</em></li>")
+            lines += ["</ul>", "</details>", ""]
 
     return "\n".join(lines)
 
