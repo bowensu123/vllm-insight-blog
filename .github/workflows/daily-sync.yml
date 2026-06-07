@@ -155,9 +155,15 @@ jobs:
         run: |
           TODAY=$(date -u +%Y-%m-%d)
           ISOWEEK=$(date -u +%G-W%V)
-          SENTINEL=data/.last-emailed-day
-          if [ -f "$SENTINEL" ] && [ "$(cat "$SENTINEL")" = "$TODAY" ]; then
-            echo "Digest already emailed for $TODAY; skipping"
+          DB=data/insights.sqlite
+          # Once-per-day gate. The sentinel lives INSIDE the SQLite DB (table
+          # sync_state, entity 'email_sentinel') because only the DB is reliably
+          # persisted (actions/cache + data-branch backup + restore fallback). The
+          # old loose file data/.last-emailed-day was NOT in the cache path, so it
+          # vanished every run and the digest emailed on every 3h build (~8/day).
+          LAST=$(python -c "import sqlite3; r=sqlite3.connect('$DB').execute(\"SELECT last_synced_at FROM sync_state WHERE entity='email_sentinel'\").fetchone(); print(r[0] if r else '')" 2>/dev/null || echo "")
+          if [ "$LAST" = "$TODAY" ]; then
+            echo "Digest already emailed for $TODAY; skipping (last=$LAST)"
             exit 0
           fi
           DIGEST=docs/weekly/latest.md
@@ -183,8 +189,9 @@ jobs:
             echo "Created weekly digest issue"
           fi
           if [ "$ok" = "1" ]; then
-            mkdir -p data
-            echo "$TODAY" > "$SENTINEL"
+            # Record today's date in the DB so the next 3h build won't re-email.
+            python -c "import sqlite3;c=sqlite3.connect('$DB');c.execute(\"INSERT INTO sync_state(entity,last_synced_at) VALUES('email_sentinel',?) ON CONFLICT(entity) DO UPDATE SET last_synced_at=excluded.last_synced_at\",('$TODAY',));c.commit();c.close()"
+            echo "Marked email sentinel = $TODAY"
           else
             echo "Notification failed; not marking sentinel so it retries next run"
           fi
