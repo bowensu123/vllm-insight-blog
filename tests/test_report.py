@@ -86,3 +86,21 @@ def test_llm_failure_without_cache_shows_skip_line(db, monkeypatch):
     monkeypatch.setattr(sm, "summarize_window", boom)
     md = report.generate_weekly_digest(db, include_llm=True)
     assert "LLM digest skipped" in md
+
+
+def test_raw_list_does_not_at_mention_pr_authors(db):
+    # Regression: posting the digest to a GitHub issue must not ping PR authors.
+    add_pr(db, 1, author="hmellor")
+    md = report.generate_weekly_digest(db, include_llm=False)
+    assert "@hmellor" not in md                       # no bare mention
+    assert 'href="https://github.com/hmellor"' in md  # rendered as a profile link
+
+
+def test_neutralize_mentions_defangs_only_bare_mentions():
+    zwsp = "\u200b"
+    out = report.neutralize_mentions("ty @hmellor and @Sunt-ing")
+    assert "@hmellor" not in out and "@Sunt-ing" not in out
+    assert f"@{zwsp}hmellor" in out and f"@{zwsp}Sunt-ing" in out
+    # emails and code spans must be left intact
+    assert report.neutralize_mentions("foo@bar.com") == "foo@bar.com"
+    assert report.neutralize_mentions("`@x`") == "`@x`"

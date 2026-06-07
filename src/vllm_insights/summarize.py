@@ -92,6 +92,9 @@ WEEKLY_SYSTEM = dedent("""
     - Cite PRs as `#1234` inline. NEVER fabricate PR numbers, models, features, or
       benchmark figures — ground every claim in the provided notes/PRs. If a perf
       number isn't in the source, describe the change qualitatively instead.
+    - NEVER write GitHub usernames as @-mentions. If you must name an author, use
+      plain text ("by hmellor"), never "@hmellor" — this digest gets posted to a
+      GitHub issue and @-mentions would ping people.
     - Skip CI / lint / docs churn unless genuinely notable.
     - Place each PR under the single most-relevant theme; don't double-list.
 """).strip()
@@ -193,7 +196,7 @@ def render_input(
     for i, p in enumerate(payload["prs"][:max_prs]):
         rel = f" → {p['release_tag']}" if p.get("release_tag") else ""
         labels = f" [{p['labels']}]" if p.get("labels") else ""
-        parts.append(f"- #{p['number']} {p['title']} (@{p['author']}){labels}{rel}")
+        parts.append(f"- #{p['number']} {p['title']} (by {p['author']}){labels}{rel}")
         if i < bodies_for:
             body = (p.get("body") or "").strip()
             if body:

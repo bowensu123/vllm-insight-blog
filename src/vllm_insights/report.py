@@ -16,6 +16,7 @@ Actions workflow still calls it during the rollout.
 """
 import hashlib
 import json
+import re
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
@@ -24,6 +25,21 @@ import pandas as pd
 
 from .analyzer.queries import releases_df, prs_df
 from .db import connect
+
+
+# A bare "@handle" not preceded by a word char / backtick / @ / dot / slash, so
+# we skip email addresses (foo@bar) and paths but catch GitHub-style mentions.
+_MENTION_RE = re.compile(r"(?<![\w`/@.\-])@([A-Za-z0-9][A-Za-z0-9-]{0,38})")
+_ZWSP = "\u200b"  # zero-width space: invisible, but breaks @mention parsing
+
+
+def neutralize_mentions(text: str) -> str:
+    """Defang bare @mentions so posting this content into a GitHub issue/comment
+    doesn't ping those users. Inserts a zero-width space after '@' — visually
+    identical, but GitHub's mention parser no longer matches it. Used by the
+    email/notification step before posting the digest to an issue.
+    """
+    return _MENTION_RE.sub(lambda m: "@" + _ZWSP + m.group(1), text)
 
 
 def _payload_fingerprint(payload: dict) -> str:
@@ -179,10 +195,18 @@ def generate_weekly_digest(
                     if pd.notna(rt) and rt else ""
                 )
                 title = escape(str(p["title"]))
-                author = escape(str(p["author"]))
+                # Render the author as a profile LINK, not a bare "@handle". When
+                # this digest is posted into a GitHub issue (the email mechanism),
+                # a literal "@handle" becomes a real @-mention and pings every PR
+                # author. A link to their profile is informative without notifying.
+                author = str(p["author"] or "").strip()
+                author_html = (
+                    f'<a href="https://github.com/{escape(author, quote=True)}">{escape(author)}</a>'
+                    if author else "unknown"
+                )
                 lines.append(
                     f'<li><a href="{escape(str(p["url"]))}">#{p["number"]}</a> '
-                    f"{title} — @{author}{rel_tag}</li>"
+                    f"{title} — by {author_html}{rel_tag}</li>"
                 )
             if len(recent) > 60:
                 lines.append(f"<li><em>…and {len(recent) - 60} more</em></li>")

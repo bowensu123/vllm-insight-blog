@@ -165,16 +165,20 @@ jobs:
             echo "No digest found; skipping"
             exit 0
           fi
+          # Defang any bare @mentions so posting the digest into an issue doesn't
+          # ping PR authors. Safety net on top of report.py already linking authors.
+          BODY=$(mktemp)
+          python -c "from vllm_insights.report import neutralize_mentions; import sys; sys.stdout.write(neutralize_mentions(open('$DIGEST', encoding='utf-8').read()))" > "$BODY"
           gh label create digest --color 1f6feb --description "Weekly digest notifications" 2>/dev/null || true
           TITLE="📬 vLLM weekly digest — $ISOWEEK"
           NUM=$(gh issue list --state all --search "in:title $TITLE" --json number,title \
                   -q ".[] | select(.title==\"$TITLE\") | .number" | head -1)
           ok=0
           if [ -n "$NUM" ]; then
-            { echo "Update for $TODAY:"; echo; cat "$DIGEST"; } | gh issue comment "$NUM" --body-file - && ok=1
+            { echo "Update for $TODAY:"; echo; cat "$BODY"; } | gh issue comment "$NUM" --body-file - && ok=1
             echo "Commented on issue #$NUM"
           else
-            gh issue create --title "$TITLE" --body-file "$DIGEST" \
+            gh issue create --title "$TITLE" --body-file "$BODY" \
               --assignee "$OWNER" --label digest && ok=1
             echo "Created weekly digest issue"
           fi
