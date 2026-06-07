@@ -34,36 +34,36 @@
 
 ## Recently merged PRs (last 7 days, top 30)
 
-- [#43160](https://github.com/vllm-project/vllm/pull/43160) [MRV2][BugFix] Fix default-stream CG capture in P/W LoRA case — @njhill → `nan`
-- [#43121](https://github.com/vllm-project/vllm/pull/43121) [bug] fix WeightTransferConfig.backend to allow for all strings — @hao-aaron → `nan`
-- [#43115](https://github.com/vllm-project/vllm/pull/43115) [CPU][DOC] Fix installation commands for Arm CPUs — @fadara01 → `nan`
-- [#41277](https://github.com/vllm-project/vllm/pull/41277) Fix error in Dynamic NTK scaling — @maxdebayser → `nan`
-- [#42764](https://github.com/vllm-project/vllm/pull/42764) [Model] Support post-norm architecture for EAGLE-3 supeculators — @Dogacel → `nan`
-- [#43129](https://github.com/vllm-project/vllm/pull/43129) [ci] Move language models tests (hybrid) back to L4 — @khluu → `nan`
-- [#43119](https://github.com/vllm-project/vllm/pull/43119) [CI failure] Temporarily disable using persistent cache for flashinfer autotune — @wzhao18 → `nan`
-- [#42976](https://github.com/vllm-project/vllm/pull/42976) [Bugfix][MoE] FlashInfer one-sided: workspace union across heterogeneous layers — @tomeras91 → `nan`
-- [#42994](https://github.com/vllm-project/vllm/pull/42994) [Docs] Fix MooncakeStoreConnector role in disaggregated example — @Dao007forever → `nan`
-- [#42080](https://github.com/vllm-project/vllm/pull/42080) [feat] Add FP8 per-tensor Q scale support to Triton attention backend — @DomBrown → `nan`
-- [#42540](https://github.com/vllm-project/vllm/pull/42540) [Misc] add humming to dependencies — @jinzhen-lin → `nan`
-- [#43025](https://github.com/vllm-project/vllm/pull/43025) [Refactor] Extract extract_types_from_schema utility from Minimax M2 tool parser — @sfeng33 → `nan`
-- [#42654](https://github.com/vllm-project/vllm/pull/42654) [Model] Openvla support — @yiwen101 → `nan`
-- [#43043](https://github.com/vllm-project/vllm/pull/43043) [XPU] update xpu graph usage — @xinyu-intel → `nan`
-- [#42347](https://github.com/vllm-project/vllm/pull/42347) [Perf][4/n] Eliminate various GPU<->CPU syncs — @njhill → `nan`
-- [#42887](https://github.com/vllm-project/vllm/pull/42887) [Bugfix] Fix top logprobs token placeholders in `/inference/v1/generate` — @sagearc → `nan`
-- [#42677](https://github.com/vllm-project/vllm/pull/42677) [CI] Add MTP + PD disagg test for Qwen3.5 — @ZhanqiuHu → `nan`
-- [#43046](https://github.com/vllm-project/vllm/pull/43046) [Misc][MM] Remove redundant code in CLIPAttention — @shen-shanshan → `nan`
-- [#43077](https://github.com/vllm-project/vllm/pull/43077) [Model Refactoring] Rename deepseek_v4.py to model.py [4/N] — @WoosukKwon → `nan`
-- [#42828](https://github.com/vllm-project/vllm/pull/42828) [KVConnector][DSV4] HMA support for Mooncake store connector — @ivanium → `nan`
-- [#42117](https://github.com/vllm-project/vllm/pull/42117) [bug] AsyncScheduler drops first post-resume token after pause_generation + clear_cache — @hao-aaron → `nan`
-- [#43073](https://github.com/vllm-project/vllm/pull/43073) [Model Refactoring] Move deepseek_v4_ops to models/deepseek_v4 [3/N] — @WoosukKwon → `nan`
-- [#42946](https://github.com/vllm-project/vllm/pull/42946) [Frontend] Consolidate beam search by BeamSearchMixin. — @noooop → `nan`
-- [#41907](https://github.com/vllm-project/vllm/pull/41907) [Docs] Reorganize online serving docs. — @noooop → `nan`
-- [#43041](https://github.com/vllm-project/vllm/pull/43041) [Misc] Aligning tokwise pooler heads for consistency — @taneem-ibrahim → `nan`
-- [#41354](https://github.com/vllm-project/vllm/pull/41354) [XPU] Use custom op collective behavior  — @chaojun-zhang → `nan`
-- [#42626](https://github.com/vllm-project/vllm/pull/42626) [Docs] Add SVG images for pooling models. — @gracie-guo → `nan`
-- [#42671](https://github.com/vllm-project/vllm/pull/42671) fix: use keyword arguments for shard_id and expert_id in weight_loade… — @junyanxu → `nan`
-- [#43030](https://github.com/vllm-project/vllm/pull/43030) [ci] Route 28 gpu_1_queue tests to h200_35gb queue — @khluu → `nan`
-- [#42289](https://github.com/vllm-project/vllm/pull/42289) [Bugfix][KV Connector] Fix SimpleCPUOffloadScheduler TOCTOU between Phase A and Phase B — @qyYue1389 → `nan`
+- [#43160](https://github.com/vllm-project/vllm/pull/43160) [MRV2][BugFix] Fix default-stream CG capture in P/W LoRA case — <a href="https://github.com/njhill">@njhill</a> → `nan`
+- [#43121](https://github.com/vllm-project/vllm/pull/43121) [bug] fix WeightTransferConfig.backend to allow for all strings — <a href="https://github.com/hao-aaron">@hao-aaron</a> → `nan`
+- [#43115](https://github.com/vllm-project/vllm/pull/43115) [CPU][DOC] Fix installation commands for Arm CPUs — <a href="https://github.com/fadara01">@fadara01</a> → `nan`
+- [#41277](https://github.com/vllm-project/vllm/pull/41277) Fix error in Dynamic NTK scaling — <a href="https://github.com/maxdebayser">@maxdebayser</a> → `nan`
+- [#42764](https://github.com/vllm-project/vllm/pull/42764) [Model] Support post-norm architecture for EAGLE-3 supeculators — <a href="https://github.com/Dogacel">@Dogacel</a> → `nan`
+- [#43129](https://github.com/vllm-project/vllm/pull/43129) [ci] Move language models tests (hybrid) back to L4 — <a href="https://github.com/khluu">@khluu</a> → `nan`
+- [#43119](https://github.com/vllm-project/vllm/pull/43119) [CI failure] Temporarily disable using persistent cache for flashinfer autotune — <a href="https://github.com/wzhao18">@wzhao18</a> → `nan`
+- [#42976](https://github.com/vllm-project/vllm/pull/42976) [Bugfix][MoE] FlashInfer one-sided: workspace union across heterogeneous layers — <a href="https://github.com/tomeras91">@tomeras91</a> → `nan`
+- [#42994](https://github.com/vllm-project/vllm/pull/42994) [Docs] Fix MooncakeStoreConnector role in disaggregated example — <a href="https://github.com/Dao007forever">@Dao007forever</a> → `nan`
+- [#42080](https://github.com/vllm-project/vllm/pull/42080) [feat] Add FP8 per-tensor Q scale support to Triton attention backend — <a href="https://github.com/DomBrown">@DomBrown</a> → `nan`
+- [#42540](https://github.com/vllm-project/vllm/pull/42540) [Misc] add humming to dependencies — <a href="https://github.com/jinzhen-lin">@jinzhen-lin</a> → `nan`
+- [#43025](https://github.com/vllm-project/vllm/pull/43025) [Refactor] Extract extract_types_from_schema utility from Minimax M2 tool parser — <a href="https://github.com/sfeng33">@sfeng33</a> → `nan`
+- [#42654](https://github.com/vllm-project/vllm/pull/42654) [Model] Openvla support — <a href="https://github.com/yiwen101">@yiwen101</a> → `nan`
+- [#43043](https://github.com/vllm-project/vllm/pull/43043) [XPU] update xpu graph usage — <a href="https://github.com/xinyu-intel">@xinyu-intel</a> → `nan`
+- [#42347](https://github.com/vllm-project/vllm/pull/42347) [Perf][4/n] Eliminate various GPU<->CPU syncs — <a href="https://github.com/njhill">@njhill</a> → `nan`
+- [#42887](https://github.com/vllm-project/vllm/pull/42887) [Bugfix] Fix top logprobs token placeholders in `/inference/v1/generate` — <a href="https://github.com/sagearc">@sagearc</a> → `nan`
+- [#42677](https://github.com/vllm-project/vllm/pull/42677) [CI] Add MTP + PD disagg test for Qwen3.5 — <a href="https://github.com/ZhanqiuHu">@ZhanqiuHu</a> → `nan`
+- [#43046](https://github.com/vllm-project/vllm/pull/43046) [Misc][MM] Remove redundant code in CLIPAttention — <a href="https://github.com/shen-shanshan">@shen-shanshan</a> → `nan`
+- [#43077](https://github.com/vllm-project/vllm/pull/43077) [Model Refactoring] Rename deepseek_v4.py to model.py [4/N] — <a href="https://github.com/WoosukKwon">@WoosukKwon</a> → `nan`
+- [#42828](https://github.com/vllm-project/vllm/pull/42828) [KVConnector][DSV4] HMA support for Mooncake store connector — <a href="https://github.com/ivanium">@ivanium</a> → `nan`
+- [#42117](https://github.com/vllm-project/vllm/pull/42117) [bug] AsyncScheduler drops first post-resume token after pause_generation + clear_cache — <a href="https://github.com/hao-aaron">@hao-aaron</a> → `nan`
+- [#43073](https://github.com/vllm-project/vllm/pull/43073) [Model Refactoring] Move deepseek_v4_ops to models/deepseek_v4 [3/N] — <a href="https://github.com/WoosukKwon">@WoosukKwon</a> → `nan`
+- [#42946](https://github.com/vllm-project/vllm/pull/42946) [Frontend] Consolidate beam search by BeamSearchMixin. — <a href="https://github.com/noooop">@noooop</a> → `nan`
+- [#41907](https://github.com/vllm-project/vllm/pull/41907) [Docs] Reorganize online serving docs. — <a href="https://github.com/noooop">@noooop</a> → `nan`
+- [#43041](https://github.com/vllm-project/vllm/pull/43041) [Misc] Aligning tokwise pooler heads for consistency — <a href="https://github.com/taneem-ibrahim">@taneem-ibrahim</a> → `nan`
+- [#41354](https://github.com/vllm-project/vllm/pull/41354) [XPU] Use custom op collective behavior  — <a href="https://github.com/chaojun-zhang">@chaojun-zhang</a> → `nan`
+- [#42626](https://github.com/vllm-project/vllm/pull/42626) [Docs] Add SVG images for pooling models. — <a href="https://github.com/gracie-guo">@gracie-guo</a> → `nan`
+- [#42671](https://github.com/vllm-project/vllm/pull/42671) fix: use keyword arguments for shard_id and expert_id in weight_loade… — <a href="https://github.com/junyanxu">@junyanxu</a> → `nan`
+- [#43030](https://github.com/vllm-project/vllm/pull/43030) [ci] Route 28 gpu_1_queue tests to h200_35gb queue — <a href="https://github.com/khluu">@khluu</a> → `nan`
+- [#42289](https://github.com/vllm-project/vllm/pull/42289) [Bugfix][KV Connector] Fix SimpleCPUOffloadScheduler TOCTOU between Phase A and Phase B — <a href="https://github.com/qyYue1389">@qyYue1389</a> → `nan`
 
 ## Top committers (last 7 days)
 
