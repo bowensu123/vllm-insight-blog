@@ -291,7 +291,8 @@ CREATE INDEX IF NOT EXISTS idx_hn_created ON hn_mentions(created_at);
 CREATE TABLE IF NOT EXISTS digest_cache (
     key            TEXT PRIMARY KEY,     -- 'weekly'
     content        TEXT NOT NULL,        -- the LLM digest markdown (no header)
-    generated_at   TEXT NOT NULL
+    generated_at   TEXT NOT NULL,
+    fingerprint    TEXT                  -- hash of the windowed data the content was built from
 );
 """
 
@@ -342,6 +343,13 @@ def init_db(db_path: Path) -> None:
             conn.execute(
                 "ALTER TABLE cluster_summary ADD COLUMN mean_distance REAL"
             )
+        # digest_cache: fingerprint of the windowed data, so we can skip the LLM
+        # call when nothing changed since the last good generation.
+        dc_cols = {r["name"] for r in conn.execute(
+            "PRAGMA table_info(digest_cache)"
+        ).fetchall()}
+        if dc_cols and "fingerprint" not in dc_cols:
+            conn.execute("ALTER TABLE digest_cache ADD COLUMN fingerprint TEXT")
 
 
 def get_sync_state(conn: sqlite3.Connection, entity: str) -> str | None:

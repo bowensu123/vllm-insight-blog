@@ -14,6 +14,8 @@ attention. We now emit a single themed weekly digest, written under
 The legacy `generate_daily_report` name is kept as an alias because the GH
 Actions workflow still calls it during the rollout.
 """
+import hashlib
+import json
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
@@ -24,32 +26,53 @@ from .analyzer.queries import releases_df, prs_df
 from .db import connect
 
 
-def _load_cached_digest(db_path: Path, key: str = "weekly") -> tuple[str, str] | None:
-    """Return (content, generated_at) of the last good digest, or None."""
+def _payload_fingerprint(payload: dict) -> str:
+    """Stable hash of the windowed data the digest is built from.
+
+    Two runs over the same set of releases + merged PRs (same numbers, merge
+    times and release links) produce the same fingerprint, so we can skip a
+    redundant LLM call when nothing material changed.
+    """
+    rel = sorted(
+        (r.get("tag"), r.get("published_at")) for r in payload.get("releases", [])
+    )
+    prs = sorted(
+        (p.get("number"), p.get("merged_at"), p.get("release_tag"))
+        for p in payload.get("prs", [])
+    )
+    blob = json.dumps({"rel": rel, "prs": prs}, default=str, sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _load_cached_digest(db_path: Path, key: str = "weekly") -> tuple[str, str, str | None] | None:
+    """Return (content, generated_at, fingerprint) of the last good digest, or None."""
     try:
         with connect(db_path) as conn:
             row = conn.execute(
-                "SELECT content, generated_at FROM digest_cache WHERE key = ?",
+                "SELECT content, generated_at, fingerprint FROM digest_cache WHERE key = ?",
                 (key,),
             ).fetchone()
     except Exception:
         return None
     if row and (row["content"] or "").strip():
-        return row["content"], row["generated_at"]
+        return row["content"], row["generated_at"], row["fingerprint"]
     return None
 
 
-def _store_cached_digest(db_path: Path, content: str, key: str = "weekly") -> None:
-    """Persist a freshly generated good digest for future fallback."""
+def _store_cached_digest(
+    db_path: Path, content: str, fingerprint: str | None = None, key: str = "weekly"
+) -> None:
+    """Persist a freshly generated good digest for future reuse / fallback."""
     try:
         with connect(db_path) as conn:
             conn.execute(
-                """INSERT INTO digest_cache(key, content, generated_at)
-                   VALUES(?, ?, ?)
+                """INSERT INTO digest_cache(key, content, generated_at, fingerprint)
+                   VALUES(?, ?, ?, ?)
                    ON CONFLICT(key) DO UPDATE SET
                      content = excluded.content,
-                     generated_at = excluded.generated_at""",
-                (key, content, datetime.now(timezone.utc).isoformat()),
+                     generated_at = excluded.generated_at,
+                     fingerprint = excluded.fingerprint""",
+                (key, content, datetime.now(timezone.utc).isoformat(), fingerprint),
             )
     except Exception:
         # Caching is best-effort; never let it break digest generation.
@@ -78,35 +101,45 @@ def generate_weekly_digest(
 
     # ----- LLM themed digest at the top (the actual content) -----
     if include_llm:
-        from .summarize import summarize_window
-        try:
-            digest = summarize_window(
-                db_path, days=days, model=llm_model,
-                backend=llm_backend, repo=repo, include_header=False,
-            ).strip()
-            lines += [digest, ""]
-            # Remember this good generation so a future failure can fall back.
-            _store_cached_digest(db_path, digest)
-        except Exception as e:
-            # The LLM section IS the core value of this page. Rather than publish
-            # a digest whose insight section is just an error line, fall back to
-            # the most recent successful digest if we have one cached.
-            cached = _load_cached_digest(db_path)
-            if cached:
-                content, gen_at = cached
-                stamp = gen_at[:10]
-                lines += [
-                    f"> ℹ️ _Live summary unavailable ({type(e).__name__}); "
-                    f"showing the last successful digest from {stamp}._",
-                    "",
-                    content.strip(),
-                    "",
-                ]
-            else:
-                lines += [
-                    f"_LLM digest skipped: {type(e).__name__}: {e}_",
-                    "",
-                ]
+        from .summarize import summarize_window, collect_window
+        # summarize_window clamps very short windows up to 7 days; mirror that so
+        # the fingerprint matches the data the LLM actually summarised.
+        eff_days = 7 if days < 3 else days
+        fingerprint = _payload_fingerprint(collect_window(db_path, days=eff_days))
+        cached = _load_cached_digest(db_path)
+
+        if cached and cached[2] == fingerprint:
+            # Data is unchanged since the last good generation — reuse it and skip
+            # the (slow, paid, nondeterministic) LLM call entirely.
+            lines += [cached[0].strip(), ""]
+        else:
+            try:
+                digest = summarize_window(
+                    db_path, days=days, model=llm_model,
+                    backend=llm_backend, repo=repo, include_header=False,
+                ).strip()
+                lines += [digest, ""]
+                # Remember this good generation for reuse and failure-fallback.
+                _store_cached_digest(db_path, digest, fingerprint=fingerprint)
+            except Exception as e:
+                # The LLM section IS the core value of this page. Rather than
+                # publish a digest whose insight section is just an error line,
+                # fall back to the most recent successful digest if we have one.
+                if cached:
+                    content, gen_at = cached[0], cached[1]
+                    stamp = gen_at[:10]
+                    lines += [
+                        f"> ℹ️ _Live summary unavailable ({type(e).__name__}); "
+                        f"showing the last successful digest from {stamp}._",
+                        "",
+                        content.strip(),
+                        "",
+                    ]
+                else:
+                    lines += [
+                        f"_LLM digest skipped: {type(e).__name__}: {e}_",
+                        "",
+                    ]
 
     # ----- Releases that landed in the window -----
     rel = releases_df(db_path)

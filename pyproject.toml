@@ -16,6 +16,12 @@ dependencies = [
     "markdown>=3.6",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
 [project.scripts]
 vllm-insights = "vllm_insights.cli:app"
 
@@ -25,3 +31,21 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+# Let pytest import the package straight from src/ without an editable install.
+pythonpath = ["src", "tests"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# Pragmatic default set: pyflakes (F), pycodestyle errors (E), warnings (W),
+# isort (I), bugbear (B), pyupgrade (UP).
+select = ["E", "W", "F", "I", "B", "UP"]
+# E501 (line length) is handled by the formatter; B008 trips on Typer's
+# Option()-in-default pattern which is idiomatic here.
+ignore = ["E501", "B008"]

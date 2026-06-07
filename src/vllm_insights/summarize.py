@@ -157,7 +157,7 @@ def collect_window(db_path: Path, days: int) -> dict:
             (since_iso,),
         ).fetchall()
         prs = conn.execute(
-            "SELECT number, title, author, merged_at, release_tag, labels, url "
+            "SELECT number, title, author, merged_at, release_tag, labels, url, body "
             "FROM pull_requests WHERE merged_at >= ? ORDER BY merged_at DESC",
             (since_iso,),
         ).fetchall()
@@ -166,7 +166,19 @@ def collect_window(db_path: Path, days: int) -> dict:
             "prs": [dict(p) for p in prs]}
 
 
-def render_input(payload: dict, max_prs: int = 200) -> str:
+def render_input(
+    payload: dict,
+    max_prs: int = 200,
+    bodies_for: int = 30,
+    body_chars: int = 600,
+) -> str:
+    """Render the LLM input.
+
+    For the first ``bodies_for`` (most recent) PRs we include a short excerpt of
+    the PR description, so the "Deep dives" section can explain what a change
+    actually does instead of guessing from the title alone. Bodies are truncated
+    to ``body_chars`` and flattened to one line to keep the prompt bounded.
+    """
     parts = [f"Window: last {payload['days']} day(s), since {payload['since']}", ""]
     if payload["releases"]:
         parts.append("## Releases in window")
@@ -178,10 +190,17 @@ def render_input(payload: dict, max_prs: int = 200) -> str:
             parts.append(body or "_(no body)_")
             parts.append("")
     parts.append(f"## Merged PRs in window (up to {max_prs})")
-    for p in payload["prs"][:max_prs]:
+    for i, p in enumerate(payload["prs"][:max_prs]):
         rel = f" → {p['release_tag']}" if p.get("release_tag") else ""
         labels = f" [{p['labels']}]" if p.get("labels") else ""
         parts.append(f"- #{p['number']} {p['title']} (@{p['author']}){labels}{rel}")
+        if i < bodies_for:
+            body = (p.get("body") or "").strip()
+            if body:
+                body = " ".join(body.split())  # flatten whitespace/newlines
+                if len(body) > body_chars:
+                    body = body[:body_chars] + "…"
+                parts.append(f"  > {body}")
     if len(payload["prs"]) > max_prs:
         parts.append(f"_…and {len(payload['prs']) - max_prs} more_")
     return "\n".join(parts)

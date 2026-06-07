@@ -58,6 +58,25 @@ jobs:
           restore-keys: |
             vllm-insights-db-
 
+      # Durable backup of last resort: if the (evictable) cache missed, restore
+      # the accumulated history from the `data` branch backup. Without this, a
+      # cache eviction would silently reset all historical insights to zero.
+      - name: Restore DB from data branch (cache-miss fallback)
+        run: |
+          if [ ! -f data/insights.sqlite ]; then
+            echo "SQLite cache missed — trying the data-branch backup."
+            git fetch --depth=1 origin data 2>/dev/null || true
+            if git cat-file -e origin/data:insights.sqlite.gz 2>/dev/null; then
+              mkdir -p data
+              git show origin/data:insights.sqlite.gz | gunzip > data/insights.sqlite
+              echo "Restored DB from data-branch backup."
+            else
+              echo "No data-branch backup yet — starting fresh."
+            fi
+          else
+            echo "Using cached SQLite."
+          fi
+
       - name: Sync (releases / PRs / commits / issues / forks / registry / source-scan)
         run: |
           if [ "${{ inputs.full }}" = "true" ]; then
@@ -118,19 +137,24 @@ jobs:
             echo "No digest changes to commit."
           fi
 
-      # Email the weekly digest via GitHub's own notification system: create an
-      # issue assigned to the repo owner. GitHub emails issue assignees, so the
-      # digest lands in the owner's GitHub notification inbox — no SMTP / external
-      # service needed. Set your GitHub account's notification email to
-      # subowen5@huawei.com (Settings → Emails / Notifications) to receive it there.
+      # Email the weekly digest via GitHub's own notification system. We keep ONE
+      # issue per ISO week ("📬 vLLM weekly digest — 2026-W23") assigned to the
+      # repo owner; the first run of the week creates it, later days in the same
+      # week add a comment. Both creation and comments fire a notification email
+      # to the assignee, so the digest lands in the owner's inbox — no SMTP /
+      # external service. Reusing one issue per week (instead of one per day)
+      # keeps the tracker from filling up with hundreds of issues.
       #
-      # The sync/build runs every 3h, but this step is gated to once per UTC day
-      # (a date sentinel persisted via actions/cache), so you get ~one email/24h.
+      # Set your GitHub account notification email to subowen5@huawei.com
+      # (Settings → Emails / Notifications) to receive it there. Gated to once per
+      # UTC day via a date sentinel persisted with the DB.
       - name: Email weekly digest via GitHub notification (once per 24h)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
         run: |
           TODAY=$(date -u +%Y-%m-%d)
+          ISOWEEK=$(date -u +%G-W%V)
           SENTINEL=data/.last-emailed-day
           if [ -f "$SENTINEL" ] && [ "$(cat "$SENTINEL")" = "$TODAY" ]; then
             echo "Digest already emailed for $TODAY; skipping"
@@ -141,20 +165,73 @@ jobs:
             echo "No digest found; skipping"
             exit 0
           fi
-          # Create the issue assigned to the repo owner; the assignment fires a
-          # notification email containing the digest body. Then close it to keep
-          # the tracker clean (the email is already sent on creation).
-          if ISSUE_URL=$(gh issue create \
-               --title "📬 vLLM weekly digest — $TODAY" \
-               --body-file "$DIGEST" \
-               --assignee "${{ github.repository_owner }}"); then
-            echo "Created digest issue: $ISSUE_URL"
-            gh issue close "$ISSUE_URL" >/dev/null 2>&1 || true
+          gh label create digest --color 1f6feb --description "Weekly digest notifications" 2>/dev/null || true
+          TITLE="📬 vLLM weekly digest — $ISOWEEK"
+          NUM=$(gh issue list --state all --search "in:title $TITLE" --json number,title \
+                  -q ".[] | select(.title==\"$TITLE\") | .number" | head -1)
+          ok=0
+          if [ -n "$NUM" ]; then
+            { echo "Update for $TODAY:"; echo; cat "$DIGEST"; } | gh issue comment "$NUM" --body-file - && ok=1
+            echo "Commented on issue #$NUM"
+          else
+            gh issue create --title "$TITLE" --body-file "$DIGEST" \
+              --assignee "$OWNER" --label digest && ok=1
+            echo "Created weekly digest issue"
+          fi
+          if [ "$ok" = "1" ]; then
             mkdir -p data
             echo "$TODAY" > "$SENTINEL"
           else
-            echo "Issue create failed; not marking sentinel so it retries next run"
+            echo "Notification failed; not marking sentinel so it retries next run"
           fi
+
+      # Observability: if the digest could not produce its LLM section (and had no
+      # cached fallback), open or update a single dedup'd alert issue so failures
+      # don't pass silently. Runs even if earlier steps failed.
+      - name: Alert on digest failure
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          if [ -f docs/weekly/latest.md ] && grep -q "LLM digest skipped" docs/weekly/latest.md; then
+            gh label create digest --color 1f6feb 2>/dev/null || true
+            TITLE="⚠️ Weekly digest LLM generation is failing"
+            BODY="The weekly digest could not generate its LLM section on $(date -u +%F) (run ${{ github.run_id }}). Check the DASHSCOPE_API_KEY secret and the 'Weekly themed digest' step logs."
+            NUM=$(gh issue list --state open --search "in:title $TITLE" --json number,title \
+                    -q ".[] | select(.title==\"$TITLE\") | .number" | head -1)
+            if [ -n "$NUM" ]; then
+              gh issue comment "$NUM" --body "$BODY" || true
+            else
+              gh issue create --title "$TITLE" --body "$BODY" --assignee "$OWNER" --label digest \
+                || gh issue create --title "$TITLE" --body "$BODY" --assignee "$OWNER" || true
+            fi
+          else
+            echo "Digest OK — no alert."
+          fi
+
+      # Durable DB backup: push a gzipped snapshot to a single-commit `data`
+      # branch (orphan each time, so binary history never bloats the repo). This
+      # is the source the cache-miss fallback restores from. Best-effort.
+      - name: Back up DB to data branch
+        if: always()
+        run: |
+          [ -f data/insights.sqlite ] || { echo "No DB to back up."; exit 0; }
+          gzip -c data/insights.sqlite > insights.sqlite.gz
+          git config user.name "vllm-insights-bot"
+          git config user.email "bot@users.noreply.github.com"
+          tmp=$(mktemp -d)
+          git worktree add --detach "$tmp" >/dev/null 2>&1 || { echo "worktree failed"; exit 0; }
+          (
+            cd "$tmp"
+            git checkout --orphan data-snapshot >/dev/null 2>&1
+            git rm -rf . >/dev/null 2>&1 || true
+            cp "$GITHUB_WORKSPACE/insights.sqlite.gz" .
+            git add insights.sqlite.gz
+            git commit -m "data: snapshot $(date -u +%FT%TZ)" >/dev/null 2>&1 || exit 0
+            git push -f origin data-snapshot:data
+          ) || echo "DB backup push failed (non-fatal)."
+          git worktree remove --force "$tmp" 2>/dev/null || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
