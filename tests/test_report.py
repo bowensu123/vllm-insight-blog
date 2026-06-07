@@ -104,3 +104,15 @@ def test_neutralize_mentions_defangs_only_bare_mentions():
     # emails and code spans must be left intact
     assert report.neutralize_mentions("foo@bar.com") == "foo@bar.com"
     assert report.neutralize_mentions("`@x`") == "`@x`"
+
+
+def test_neutralize_defangs_bare_issue_refs_but_not_links():
+    zwsp = "\u200b"
+    # bare #1234 would cross-reference (and notify) the referenced issue
+    assert report.neutralize_mentions("see #1234") == f"see #{zwsp}1234"
+    # already-linked or anchored refs must be left intact
+    assert report.neutralize_mentions("[#1234](http://x)") == "[#1234](http://x)"
+    assert report.neutralize_mentions('<a href="u">#44417</a>') == '<a href="u">#44417</a>'
+    # markdown headings and line refs must not be touched
+    assert report.neutralize_mentions("## TL;DR") == "## TL;DR"
+    assert report.neutralize_mentions("file.py#L20") == "file.py#L20"

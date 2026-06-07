@@ -146,24 +146,27 @@ jobs:
       # keeps the tracker from filling up with hundreds of issues.
       #
       # Set your GitHub account notification email to subowen5@huawei.com
-      # (Settings → Emails / Notifications) to receive it there. Gated to once per
-      # UTC day via a date sentinel persisted with the DB.
-      - name: Email weekly digest via GitHub notification (once per 24h)
+      # (Settings → Emails / Notifications) to receive it there. Gated to at most
+      # once every MIN_DAYS days via a date sentinel persisted inside the DB.
+      - name: Email weekly digest via GitHub notification (every 2 days)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
+          MIN_DAYS: "2"
         run: |
           TODAY=$(date -u +%Y-%m-%d)
           ISOWEEK=$(date -u +%G-W%V)
           DB=data/insights.sqlite
-          # Once-per-day gate. The sentinel lives INSIDE the SQLite DB (table
-          # sync_state, entity 'email_sentinel') because only the DB is reliably
-          # persisted (actions/cache + data-branch backup + restore fallback). The
-          # old loose file data/.last-emailed-day was NOT in the cache path, so it
-          # vanished every run and the digest emailed on every 3h build (~8/day).
+          # Send at most once every $MIN_DAYS days. The sentinel lives INSIDE the
+          # SQLite DB (sync_state, entity 'email_sentinel') because only the DB is
+          # reliably persisted (actions/cache + data-branch backup + restore
+          # fallback). The old loose file data/.last-emailed-day was NOT in the
+          # cache path, so it vanished every run and the digest emailed on every
+          # 3h build (~8/day).
           LAST=$(python -c "import sqlite3; r=sqlite3.connect('$DB').execute(\"SELECT last_synced_at FROM sync_state WHERE entity='email_sentinel'\").fetchone(); print(r[0] if r else '')" 2>/dev/null || echo "")
-          if [ "$LAST" = "$TODAY" ]; then
-            echo "Digest already emailed for $TODAY; skipping (last=$LAST)"
+          SEND=$(python -c "import datetime; last='$LAST'.strip(); print('1' if not last or (datetime.date.fromisoformat('$TODAY')-datetime.date.fromisoformat(last)).days>=$MIN_DAYS else '0')" 2>/dev/null || echo "1")
+          if [ "$SEND" != "1" ]; then
+            echo "Last emailed $LAST; fewer than $MIN_DAYS day(s) ago — skipping"
             exit 0
           fi
           DIGEST=docs/weekly/latest.md

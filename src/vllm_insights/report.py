@@ -30,16 +30,23 @@ from .db import connect
 # A bare "@handle" not preceded by a word char / backtick / @ / dot / slash, so
 # we skip email addresses (foo@bar) and paths but catch GitHub-style mentions.
 _MENTION_RE = re.compile(r"(?<![\w`/@.\-])@([A-Za-z0-9][A-Za-z0-9-]{0,38})")
+# A bare "#1234" issue/PR reference not already inside a link ([#x] / >#x), a
+# heading (## ), or a code span. In a GitHub issue these create cross-reference
+# notifications on the referenced issue, pinging its subscribers.
+_ISSUE_REF_RE = re.compile(r"(?<![\w/\[>#`])#(\d{2,7})\b")
 _ZWSP = "\u200b"  # zero-width space: invisible, but breaks @mention parsing
 
 
 def neutralize_mentions(text: str) -> str:
-    """Defang bare @mentions so posting this content into a GitHub issue/comment
-    doesn't ping those users. Inserts a zero-width space after '@' — visually
-    identical, but GitHub's mention parser no longer matches it. Used by the
-    email/notification step before posting the digest to an issue.
+    """Defang bare @mentions AND bare #issue references so posting this content
+    into a GitHub issue/comment doesn't notify anyone. Inserts a zero-width space
+    after '@' / '#' — visually identical, but GitHub's mention and cross-reference
+    parsers no longer match. Links (e.g. ``[#1234](url)``) are left intact. Used by
+    the email/notification step before posting the digest to an issue.
     """
-    return _MENTION_RE.sub(lambda m: "@" + _ZWSP + m.group(1), text)
+    text = _MENTION_RE.sub(lambda m: "@" + _ZWSP + m.group(1), text)
+    text = _ISSUE_REF_RE.sub(lambda m: "#" + _ZWSP + m.group(1), text)
+    return text
 
 
 def _payload_fingerprint(payload: dict) -> str:
