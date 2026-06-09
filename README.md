@@ -71,9 +71,12 @@ Auto-selected by env var (`summarize._detect_backend`):
   (`vllm-insights email-digest`) straight to `MAIL_TO` — nothing is posted
   publicly and no repo watchers are notified. The send gate is a date sentinel
   stored inside the SQLite DB. The history is backed up to a `data` branch and
-  restored on cache miss. A failing digest alerts you (email if SMTP is set,
-  otherwise a dedup'd GitHub issue).
+  restored on cache miss. A failing digest alerts you privately (email if SMTP is
+  set, otherwise just a workflow log warning — never a public issue).
 - **`ci.yml`** — runs `pytest` on every push/PR; lint is advisory.
+
+Outbound data and the guarantee that nothing notifies third parties are documented
+in [PRIVACY.md](PRIVACY.md).
 
 ### Private digest email (SMTP)
 
