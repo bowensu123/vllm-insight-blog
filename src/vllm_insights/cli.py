@@ -304,6 +304,40 @@ def site(
     console.print(f"[green]Sitemap:[/] {sitemap_path}")
 
 
+@app.command(name="email-digest")
+def email_digest_cmd(
+    path: Path = typer.Option(Path("docs/weekly/latest.md"), "--path",
+                              help="Markdown digest to send"),
+    subject: str = typer.Option(None, "--subject", help="Override the email subject"),
+):
+    """Send the weekly digest to your mailbox via SMTP (private; no GitHub issue).
+
+    Exit codes: 0 = sent, 2 = SMTP not configured (skipped), 1 = send error.
+    Configure via SMTP_HOST / SMTP_USERNAME / SMTP_PASSWORD / MAIL_TO secrets.
+    """
+    from datetime import datetime, timezone
+
+    from .mailer import MailNotConfigured, send_digest
+
+    if not path.exists():
+        console.print(f"[yellow]No digest at {path}; skipping email.[/]")
+        raise typer.Exit(2)
+    text = path.read_text(encoding="utf-8")
+    if subject is None:
+        now = datetime.now(timezone.utc)
+        _, iso_week, _ = now.isocalendar()
+        subject = f"vLLM weekly digest — {now:%Y-%m-%d} (W{iso_week:02d})"
+    try:
+        recipients = send_digest(text, subject)
+    except MailNotConfigured as e:
+        console.print(f"[yellow]SMTP not configured ({e}); skipping email.[/]")
+        raise typer.Exit(2)
+    except Exception as e:  # smtplib/ssl/socket errors — let the workflow retry
+        console.print(f"[red]Email send failed: {type(e).__name__}: {e}[/]")
+        raise typer.Exit(1)
+    console.print(f"[green]Digest emailed to:[/] {', '.join(recipients)}")
+
+
 @app.command()
 def dash():
     """Launch the Streamlit dashboard."""

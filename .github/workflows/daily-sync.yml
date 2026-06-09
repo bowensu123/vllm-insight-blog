@@ -137,81 +137,95 @@ jobs:
             echo "No digest changes to commit."
           fi
 
-      # Email the weekly digest via GitHub's own notification system. We keep ONE
-      # issue per ISO week ("📬 vLLM weekly digest — 2026-W23") assigned to the
-      # repo owner; the first run of the week creates it, later days in the same
-      # week add a comment. Both creation and comments fire a notification email
-      # to the assignee, so the digest lands in the owner's inbox — no SMTP /
-      # external service. Reusing one issue per week (instead of one per day)
-      # keeps the tracker from filling up with hundreds of issues.
-      #
-      # Set your GitHub account notification email to subowen5@huawei.com
-      # (Settings → Emails / Notifications) to receive it there. Gated to at most
-      # once every MIN_DAYS days via a date sentinel persisted inside the DB.
-      - name: Email weekly digest via GitHub notification (every 2 days)
+      # Email the weekly digest privately via SMTP directly to your mailbox.
+      # Nothing is posted publicly — no GitHub issue, no repo-watcher notifications,
+      # and @mentions / #refs in the body are inert text in an email (they can't
+      # ping anyone). Configure these repo secrets to enable it (leave unset to
+      # silently skip):
+      #   SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, MAIL_TO   (required)
+      #   SMTP_PORT (default 465), SMTP_SECURITY (ssl|starttls|plain), MAIL_FROM
+      # Gated to at most once every MIN_DAYS days via a sentinel inside the DB.
+      - name: Email weekly digest via SMTP (every 2 days)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
           MIN_DAYS: "2"
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURITY: ${{ secrets.SMTP_SECURITY }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
         run: |
-          TODAY=$(date -u +%Y-%m-%d)
-          ISOWEEK=$(date -u +%G-W%V)
-          DB=data/insights.sqlite
+          export TODAY=$(date -u +%Y-%m-%d)
+          export DB=data/insights.sqlite
           # Send at most once every $MIN_DAYS days. The sentinel lives INSIDE the
           # SQLite DB (sync_state, entity 'email_sentinel') because only the DB is
           # reliably persisted (actions/cache + data-branch backup + restore
-          # fallback). The old loose file data/.last-emailed-day was NOT in the
-          # cache path, so it vanished every run and the digest emailed on every
-          # 3h build (~8/day).
-          LAST=$(python -c "import sqlite3; r=sqlite3.connect('$DB').execute(\"SELECT last_synced_at FROM sync_state WHERE entity='email_sentinel'\").fetchone(); print(r[0] if r else '')" 2>/dev/null || echo "")
-          SEND=$(python -c "import datetime; last='$LAST'.strip(); print('1' if not last or (datetime.date.fromisoformat('$TODAY')-datetime.date.fromisoformat(last)).days>=$MIN_DAYS else '0')" 2>/dev/null || echo "1")
+          # fallback). Runtime values are passed via the environment and read with
+          # os.environ + parameterized SQL — never interpolated into Python source.
+          export LAST=$(python -c 'import os,sqlite3; r=sqlite3.connect(os.environ["DB"]).execute("SELECT last_synced_at FROM sync_state WHERE entity=?",("email_sentinel",)).fetchone(); print(r[0] if r else "")' 2>/dev/null || echo "")
+          SEND=$(python -c 'import os,datetime; last=os.environ["LAST"].strip(); print("1" if not last or (datetime.date.fromisoformat(os.environ["TODAY"])-datetime.date.fromisoformat(last)).days>=int(os.environ["MIN_DAYS"]) else "0")' 2>/dev/null || echo "1")
+          echo "email gate: LAST='${LAST}' MIN_DAYS=${MIN_DAYS} -> SEND=${SEND}"
           if [ "$SEND" != "1" ]; then
-            echo "Last emailed $LAST; fewer than $MIN_DAYS day(s) ago — skipping"
+            echo "Last emailed ${LAST:-never}; fewer than $MIN_DAYS day(s) ago — skipping"
             exit 0
           fi
-          DIGEST=docs/weekly/latest.md
-          if [ ! -f "$DIGEST" ]; then
+          if [ ! -f docs/weekly/latest.md ]; then
             echo "No digest found; skipping"
             exit 0
           fi
-          # Defang any bare @mentions so posting the digest into an issue doesn't
-          # ping PR authors. Safety net on top of report.py already linking authors.
-          BODY=$(mktemp)
-          python -c "from vllm_insights.report import neutralize_mentions; import sys; sys.stdout.write(neutralize_mentions(open('$DIGEST', encoding='utf-8').read()))" > "$BODY"
-          gh label create digest --color 1f6feb --description "Weekly digest notifications" 2>/dev/null || true
-          TITLE="📬 vLLM weekly digest — $ISOWEEK"
-          NUM=$(gh issue list --state all --search "in:title $TITLE" --json number,title \
-                  -q ".[] | select(.title==\"$TITLE\") | .number" | head -1)
-          ok=0
-          if [ -n "$NUM" ]; then
-            { echo "Update for $TODAY:"; echo; cat "$BODY"; } | gh issue comment "$NUM" --body-file - && ok=1
-            echo "Commented on issue #$NUM"
+          # email-digest exits 0=sent, 2=not configured (skip), 1=send error.
+          set +e
+          vllm-insights email-digest --path docs/weekly/latest.md
+          rc=$?
+          set -e
+          if [ "$rc" = "0" ]; then
+            # The mail is already out; a bookkeeping failure here must NOT fail the
+            # step (errexit) nor leave the sentinel unwritten (would re-send), hence
+            # the trailing guard.
+            python -c 'import os,sqlite3; c=sqlite3.connect(os.environ["DB"]); c.execute("INSERT INTO sync_state(entity,last_synced_at) VALUES(?,?) ON CONFLICT(entity) DO UPDATE SET last_synced_at=excluded.last_synced_at",("email_sentinel",os.environ["TODAY"])); c.commit(); c.close()' \
+              || echo "WARNING: sentinel write failed (email already sent; may re-send next run)"
+            echo "Sent and recorded email sentinel = $TODAY"
+          elif [ "$rc" = "2" ]; then
+            echo "SMTP not configured; not marking sentinel."
           else
-            gh issue create --title "$TITLE" --body-file "$BODY" \
-              --assignee "$OWNER" --label digest && ok=1
-            echo "Created weekly digest issue"
-          fi
-          if [ "$ok" = "1" ]; then
-            # Record today's date in the DB so the next 3h build won't re-email.
-            python -c "import sqlite3;c=sqlite3.connect('$DB');c.execute(\"INSERT INTO sync_state(entity,last_synced_at) VALUES('email_sentinel',?) ON CONFLICT(entity) DO UPDATE SET last_synced_at=excluded.last_synced_at\",('$TODAY',));c.commit();c.close()"
-            echo "Marked email sentinel = $TODAY"
-          else
-            echo "Notification failed; not marking sentinel so it retries next run"
+            echo "Email send failed (rc=$rc); not marking sentinel so it retries next run."
           fi
 
       # Observability: if the digest could not produce its LLM section (and had no
-      # cached fallback), open or update a single dedup'd alert issue so failures
-      # don't pass silently. Runs even if earlier steps failed.
+      # cached fallback), alert so failures don't pass silently. Prefers a private
+      # SMTP email (same config as the digest); only if SMTP is unconfigured does
+      # it fall back to a dedup'd GitHub issue. Runs even if earlier steps failed.
       - name: Alert on digest failure
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
+          RUN_ID: ${{ github.run_id }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURITY: ${{ secrets.SMTP_SECURITY }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
         run: |
-          if [ -f docs/weekly/latest.md ] && grep -q "LLM digest skipped" docs/weekly/latest.md; then
+          if [ ! -f docs/weekly/latest.md ] || ! grep -q "LLM digest skipped" docs/weekly/latest.md; then
+            echo "Digest OK — no alert."
+            exit 0
+          fi
+          BODY="The weekly digest could not generate its LLM section on $(date -u +%F) (run $RUN_ID). Check the DASHSCOPE_API_KEY secret and the 'Weekly themed digest' step logs."
+          if [ -n "$SMTP_HOST" ] && [ -n "$SMTP_USERNAME" ] && [ -n "$SMTP_PASSWORD" ] && [ -n "$MAIL_TO" ]; then
+            ALERT_BODY="$BODY" python - <<'PY' || echo "alert email failed (non-fatal)"
+          import os
+          from vllm_insights.mailer import send_digest
+          send_digest("**vLLM digest pipeline alert**\n\n" + os.environ["ALERT_BODY"],
+                      "⚠️ vLLM digest is failing")
+          print("Alerted via email.")
+          PY
+          else
             gh label create digest --color 1f6feb 2>/dev/null || true
             TITLE="⚠️ Weekly digest LLM generation is failing"
-            BODY="The weekly digest could not generate its LLM section on $(date -u +%F) (run ${{ github.run_id }}). Check the DASHSCOPE_API_KEY secret and the 'Weekly themed digest' step logs."
             NUM=$(gh issue list --state open --search "in:title $TITLE" --json number,title \
                     -q ".[] | select(.title==\"$TITLE\") | .number" | head -1)
             if [ -n "$NUM" ]; then
@@ -220,8 +234,6 @@ jobs:
               gh issue create --title "$TITLE" --body "$BODY" --assignee "$OWNER" --label digest \
                 || gh issue create --title "$TITLE" --body "$BODY" --assignee "$OWNER" || true
             fi
-          else
-            echo "Digest OK — no alert."
           fi
 
       # Durable DB backup: push a gzipped snapshot to a single-commit `data`

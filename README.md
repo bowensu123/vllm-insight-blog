@@ -5,7 +5,8 @@ release dynamics, PR flow, technical-area trends — distilled into a **weekly,
 LLM-written technical digest** that explains what shipped and why it matters.
 
 The pipeline runs on GitHub Actions every 3 hours (sync + publish) and emails a
-teaching-oriented weekly digest once per day.
+teaching-oriented weekly digest to your mailbox via private SMTP, at most once
+every two days.
 
 ## Setup
 
@@ -17,6 +18,7 @@ copy .env.example .env
 # edit .env:
 #   GITHUB_TOKEN       (public_repo scope is enough)
 #   DASHSCOPE_API_KEY  (Alibaba Bailian; powers the LLM digest)
+#   SMTP_HOST / SMTP_USERNAME / SMTP_PASSWORD / MAIL_TO  (private digest email)
 ```
 
 ## Usage
@@ -65,11 +67,29 @@ Auto-selected by env var (`summarize._detect_backend`):
 ## Automation (GitHub Actions)
 
 - **`daily-sync.yml`** — every 3h: sync → analyze → digest → build → publish to
-  Pages. Once per UTC day it emails the digest by creating/commenting on a
-  per-ISO-week GitHub issue assigned to the repo owner (no SMTP needed — set your
-  GitHub notification email to receive it). The SQLite history is backed up to a
-  `data` branch and restored on cache miss. A failing digest opens an alert issue.
+  Pages. At most once every two days it emails the digest **privately via SMTP**
+  (`vllm-insights email-digest`) straight to `MAIL_TO` — nothing is posted
+  publicly and no repo watchers are notified. The send gate is a date sentinel
+  stored inside the SQLite DB. The history is backed up to a `data` branch and
+  restored on cache miss. A failing digest alerts you (email if SMTP is set,
+  otherwise a dedup'd GitHub issue).
 - **`ci.yml`** — runs `pytest` on every push/PR; lint is advisory.
+
+### Private digest email (SMTP)
+
+Set these repo secrets (any provider). Example for QQ mail:
+
+| Secret | Value |
+|--------|-------|
+| `SMTP_HOST` | `smtp.qq.com` |
+| `SMTP_PORT` | `465` |
+| `SMTP_USERNAME` | your full address |
+| `SMTP_PASSWORD` | the SMTP **authorization code** (not the login password) |
+| `MAIL_TO` | `subowen5@huawei.com` |
+
+`SMTP_SECURITY` (`ssl`/`starttls`/`plain`) and `MAIL_FROM` are optional. Gmail/
+Outlook use port `587` + `starttls` and an app password. If the secrets are
+absent, the email step simply skips.
 
 Required repo secret: `DASHSCOPE_API_KEY`. Optional: `OPENAI_API_KEY`
 (embeddings), `ANTHROPIC_API_KEY` (cluster labels).
