@@ -27,7 +27,11 @@ from .analysis.benchmarks import load_recent_benchmarks
 from .analyzer.queries import (
     releases_df, prs_df, commits_df, classify_pr_by_title, merge_time_stats,
 )
-from .capability import CAPABILITY_CSS, render_capability_matrix
+from .capability import (
+    CAPABILITY_CSS,
+    render_capability_matrix,
+    render_quantization_expander,
+)
 from .db import connect
 from .hero import build_upgrade_hero, build_status_strip, _backfill_progress
 from .models import (
@@ -1293,7 +1297,10 @@ def _make_sections(db_path: Path, docs_dir: Path, prs: pd.DataFrame,
         badge_label="",
         summary="Quantization, attention, parallelism, spec-decode, LoRA, and hardware platforms.",
         empty_state=empty_state("Not loaded yet", "Will fill in once data is loaded."),
-    ), render_capability_matrix(db_path, repo)))
+    ), (
+        render_quantization_expander(db_path, repo)
+        + render_capability_matrix(db_path, repo, exclude_kinds={"quantization"})
+    )))
 
     # ── 4. Supported models ──────────────────────────────────────────────────
     sections.append((Section(
