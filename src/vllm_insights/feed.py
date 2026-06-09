@@ -22,7 +22,6 @@ from xml.sax.saxutils import escape as xescape
 
 from .db import connect
 from .source_scan import load_inventory, kinds_in_order
-from .ui import subscribe_form
 
 
 def _site_base_url(repo_owner: str) -> str:
@@ -400,9 +399,8 @@ def build_about_page(
     docs_dir: Path,
     *,
     site_owner: str = "bowensu123",
-    newsletter_username: str = "",
 ) -> Path:
-    """Write `docs/about.html` — methodology + caveats + how-to-subscribe."""
+    """Write `docs/about.html` — methodology + caveats."""
     page_css = _shared_page_css()
     topbar_about = """
 <div class="topbar"><div class="topbar-inner">
@@ -466,7 +464,6 @@ article.about code {{ font-size: 0.85em; }}
 </header>
 <article class="about">
 {_ABOUT_BODY}
-{subscribe_form(newsletter_username)}
 </article>
 <footer class="foot">
 <div>vllm-insights &middot; <a href="./">home</a> &middot;

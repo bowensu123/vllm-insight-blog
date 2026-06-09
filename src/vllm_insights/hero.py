@@ -37,7 +37,7 @@ from pathlib import Path
 from .analysis.social import hottest_recent_prs
 from .analysis.topics import cluster_momentum
 from .db import connect
-from .ui import status_strip, subscribe_form
+from .ui import status_strip
 
 
 # ---------------------------------------------------------------------------
@@ -166,7 +166,6 @@ def _render_verdict_hero(
     signals: dict,
     who_bullets: list[str],
     db_path: Path,
-    newsletter_username: str,
 ) -> str:
     tag = escape(rel["tag"])
     published = (rel.get("published_at") or "")[:10]
@@ -213,7 +212,6 @@ def _render_verdict_hero(
         who_html = f'<div class="verdict-who"><ul>\n    {lis}\n  </ul></div>'
 
     strip = build_status_strip(db_path)
-    sub = subscribe_form(newsletter_username)
 
     return f"""
 <section class="hero hero-verdict" aria-labelledby="hero-verdict-title">
@@ -229,7 +227,6 @@ def _render_verdict_hero(
   </div>
   {who_html}
   {strip}
-  {sub}
 </section>
 """.strip()
 
@@ -346,7 +343,6 @@ def build_status_strip(db_path: Path) -> str:
 def build_upgrade_hero(
     db_path: Path,
     repo_url: str,
-    newsletter_username: str = "",
 ) -> str:
     """Return the hero section HTML.
 
@@ -374,20 +370,17 @@ def build_upgrade_hero(
                 signals = _release_signals(db_path, rel["tag"], rel["published_at"])
                 who_bullets = _extract_who_bullets(rel.get("summary") or "")
                 return _render_verdict_hero(
-                    rel, verdict, signals, who_bullets,
-                    db_path, newsletter_username,
+                    rel, verdict, signals, who_bullets, db_path,
                 )
 
     # Fallback: standard takeaway hero
     eyebrow, body_html = build_hero_takeaway(db_path)
     strip = build_status_strip(db_path)
-    sub = subscribe_form(newsletter_username)
     return f"""
 <section class="hero" aria-labelledby="hero-title">
   <p class="hero-eyebrow">{eyebrow}</p>
   <h1 class="hero-title" id="hero-title">A live view of what vLLM is shipping.</h1>
   <div class="hero-body">{body_html}</div>
   {strip}
-  {sub}
 </section>
 """.strip()

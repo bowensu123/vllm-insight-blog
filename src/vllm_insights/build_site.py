@@ -6,7 +6,6 @@ shell primitives and design tokens. The data each section renders is
 unchanged; this module only wires the data into the new chrome.
 """
 import json
-import os
 import re
 from datetime import datetime, timezone
 from html import escape
@@ -1420,11 +1419,7 @@ def _render_toc(sections: list[tuple[Section, str]]) -> str:
 
 def _render_hero(db_path: Path, repo_url: str) -> str:
     """Hero block — upgrade verdict (when available) or daily takeaway."""
-    return build_upgrade_hero(
-        db_path,
-        repo_url,
-        newsletter_username=os.getenv("BUTTONDOWN_USERNAME", ""),
-    )
+    return build_upgrade_hero(db_path, repo_url)
 
 
 def _site_js() -> str:

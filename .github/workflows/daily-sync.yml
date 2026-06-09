@@ -16,7 +16,6 @@ permissions:
   pages: write
   id-token: write
   models: read
-  issues: write   # create the daily digest issue that GitHub emails to the assignee
 
 concurrency:
   group: vllm-insights-publish
@@ -193,14 +192,13 @@ jobs:
           fi
 
       # Observability: if the digest could not produce its LLM section (and had no
-      # cached fallback), alert so failures don't pass silently. Prefers a private
-      # SMTP email (same config as the digest); only if SMTP is unconfigured does
-      # it fall back to a dedup'd GitHub issue. Runs even if earlier steps failed.
+      # cached fallback), alert so failures don't pass silently. Strictly private:
+      # a private SMTP email if configured, otherwise just a log line / red step.
+      # We deliberately do NOT create any GitHub issue (which would surface to repo
+      # watchers). Runs even if earlier steps failed.
       - name: Alert on digest failure
         if: always()
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
           RUN_ID: ${{ github.run_id }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
@@ -224,16 +222,8 @@ jobs:
           print("Alerted via email.")
           PY
           else
-            gh label create digest --color 1f6feb 2>/dev/null || true
-            TITLE="⚠️ Weekly digest LLM generation is failing"
-            NUM=$(gh issue list --state open --search "in:title $TITLE" --json number,title \
-                    -q ".[] | select(.title==\"$TITLE\") | .number" | head -1)
-            if [ -n "$NUM" ]; then
-              gh issue comment "$NUM" --body "$BODY" || true
-            else
-              gh issue create --title "$TITLE" --body "$BODY" --assignee "$OWNER" --label digest \
-                || gh issue create --title "$TITLE" --body "$BODY" --assignee "$OWNER" || true
-            fi
+            echo "::warning::$BODY"
+            echo "SMTP not configured — logged the alert only (no GitHub issue created)."
           fi
 
       # Durable DB backup: push a gzipped snapshot to a single-commit `data`
