@@ -44,51 +44,219 @@ def _gh_blob_url(repo: str, path: str, sha: str | None) -> str:
     return f"https://github.com/{repo}/blob/{rev}/{path}"
 
 
-# Short, operator-facing descriptions for the quantization methods vLLM ships.
-# Keyed by the file stem under vllm/model_executor/layers/quantization/. Anything
-# not listed falls back to a generic line — we never invent specifics.
-_QUANT_DESCRIPTIONS: dict[str, str] = {
-    "fp8": "8-bit float (E4M3) weight/activation quant — near-lossless on Hopper/Ada with hardware FP8.",
-    "fp4": "4-bit float weight quant (e.g. NVFP4 on Blackwell).",
-    "mxfp4": "MXFP4 — microscaling, block-scaled 4-bit float format.",
-    "awq": "Activation-aware Weight Quantization — 4-bit weights that protect salient channels by activation scale.",
-    "awq_marlin": "AWQ weights served through the Marlin INT4 kernel for high-throughput GPU inference.",
-    "awq_triton": "AWQ dequant/GEMM implemented in Triton.",
-    "gptq": "GPTQ — post-training 4-bit weight quant via approximate second-order (Hessian) error correction.",
-    "gptq_marlin": "GPTQ weights served through the Marlin kernel.",
-    "gptq_marlin_24": "GPTQ + 2:4 structured sparsity on the Marlin kernel.",
-    "gptq_bitblas": "GPTQ weights served through BitBLAS mixed-precision GEMM.",
-    "marlin": "Marlin — fast mixed-precision INT4×FP16 GEMM kernel for Ampere+ GPUs.",
-    "gguf": "GGUF — the llama.cpp quantized weight format (k-quants etc.).",
-    "bitsandbytes": "bitsandbytes — on-the-fly 4-bit (NF4) / 8-bit weight quant, popular for QLoRA-style loading.",
-    "compressed_tensors": "compressed-tensors — general schema (W8A8 INT8/FP8, INT4, …) from the LLM-Compressor toolchain.",
-    "fbgemm_fp8": "FBGEMM FP8 — Meta's FP8 GEMM path.",
-    "modelopt": "NVIDIA TensorRT Model Optimizer quant (FP8 / INT4) checkpoints.",
-    "experts_int8": "INT8 quantization for MoE expert weights.",
-    "int8": "Generic INT8 weight/activation quantization.",
-    "tpu_int8": "INT8 quantization path for TPU.",
-    "quark": "AMD Quark quantization checkpoints.",
-    "hqq": "Half-Quadratic Quantization — fast, calibration-free low-bit quant.",
-    "aqlm": "AQLM — Additive Quantization, extreme low-bit (2–3 bit).",
-    "qqq": "QQQ — W4A8 quality quantization.",
-    "deepspeedfp": "DeepSpeed FP-quantized weights.",
-    "moe_wna16": "Weight-only INT4/INT8 (WNA16) kernels for MoE layers.",
-    "ipex_quant": "Intel IPEX quantization (CPU / XPU).",
-    "neuron_quant": "AWS Neuron (Trainium / Inferentia) quantization.",
-    "torchao": "torchao — PyTorch-native int4/int8/fp8 quantization integration.",
-    "bitblas": "BitBLAS — mixed-precision GEMM kernels (e.g. for GPTQ / AWQ).",
-    "auto_round": "AutoRound — sign-gradient-descent weight rounding for low-bit quant.",
-    "petit_nvfp4": "NVFP4 served through the Petit kernel.",
-    "rtn": "Round-to-nearest — simple baseline weight quantization.",
+# For each quantization method vLLM ships: a short tagline plus a "how it works"
+# principle (2-4 sentences). Keyed by the file stem under
+# vllm/model_executor/layers/quantization/. Anything not listed falls back to a
+# generic note — we never invent specifics.
+_QUANT_INFO: dict[str, tuple[str, str]] = {
+    "fp8": (
+        "8-bit float (E4M3) weights/activations — near-lossless, hardware-accelerated.",
+        "Stores values in 8-bit floating point, almost always the E4M3 layout (1 sign, "
+        "4 exponent, 3 mantissa bits). Keeping an exponent gives a wide dynamic range from "
+        "just a per-tensor or per-channel scale, so accuracy loss is small. Hopper/Ada/"
+        "Blackwell tensor cores run FP8 matmuls natively, so W8A8 FP8 is both smaller and "
+        "faster, not merely smaller.",
+    ),
+    "fp4": (
+        "4-bit float weights (e.g. NVFP4) for Blackwell.",
+        "Like FP8 but 4 bits — typically E2M1 (1 sign, 2 exponent, 1 mantissa) with a shared "
+        "micro-scale per small block, and sometimes a second global scale. Blackwell tensor "
+        "cores execute FP4 directly for large memory/throughput wins; the block scales keep "
+        "the 4-bit elements accurate.",
+    ),
+    "mxfp4": (
+        "Microscaling block-scaled 4-bit float (OCP MX).",
+        "Groups weights into small blocks (commonly 32 elements). Each block shares one 8-bit "
+        "power-of-two scale (E8M0) and each element is a 4-bit float (E2M1). The shared block "
+        "scale captures local magnitude, so the 4-bit elements stay accurate without per-value "
+        "metadata.",
+    ),
+    "awq": (
+        "Activation-aware 4-bit weight quant that protects salient channels.",
+        "Observes that a small fraction of weight channels — those multiplied by large-"
+        "magnitude activations — dominate the output error. Using a calibration set, AWQ "
+        "searches a per-channel scaling that shrinks those salient channels before rounding "
+        "weights to 4-bit, pushing error onto unimportant channels. Weight-only (W4A16), no "
+        "backprop.",
+    ),
+    "awq_marlin": (
+        "AWQ 4-bit weights run through the fast Marlin kernel.",
+        "AWQ decides the quantized values; Marlin provides a high-throughput INT4×FP16 GEMM on "
+        "Ampere+ GPUs that dequantizes on the fly. The result is small (4-bit) and fast at "
+        "serving time.",
+    ),
+    "awq_triton": (
+        "AWQ dequant/GEMM written in Triton for portability.",
+        "Same AWQ weights as awq_marlin, but the dequantization and matmul are implemented in "
+        "Triton so they run on GPUs/configs where the hand-tuned Marlin kernel isn't available.",
+    ),
+    "gptq": (
+        "Post-training low-bit weight quant with second-order error correction.",
+        "Quantizes weights one column at a time and, after each step, updates the remaining "
+        "un-quantized weights to compensate for the error just introduced, guided by a layer-"
+        "wise second-order (Hessian) objective estimated from calibration activations. This "
+        "greedy error correction keeps 3-4 bit weights accurate. Weight-only.",
+    ),
+    "gptq_marlin": (
+        "GPTQ weights run through the fast Marlin kernel.",
+        "GPTQ decides the quantized values; the Marlin INT4×FP16 kernel serves them at high "
+        "throughput on Ampere+ GPUs with on-the-fly dequant.",
+    ),
+    "gptq_marlin_24": (
+        "GPTQ + 2:4 structured sparsity on a sparse Marlin kernel.",
+        "Adds 2:4 structured sparsity (two of every four weights forced to zero) on top of "
+        "GPTQ's 4-bit weights, and serves them through a sparse Marlin kernel — stacking "
+        "sparsity on quantization for extra speedup on GPUs that support 2:4.",
+    ),
+    "gptq_bitblas": (
+        "GPTQ weights served through BitBLAS GEMM.",
+        "GPTQ-quantized weights executed by BitBLAS-generated mixed-precision GEMM kernels, an "
+        "alternative kernel backend to Marlin.",
+    ),
+    "marlin": (
+        "A fast mixed-precision INT4×FP16 GEMM kernel (not a scheme).",
+        "Marlin isn't a quantization method but a kernel: a highly optimized GEMM that "
+        "multiplies INT4 weights by FP16 activations at near-roofline speed on Ampere+ GPUs, "
+        "dequantizing inline. AWQ/GPTQ weights are run through it.",
+    ),
+    "gguf": (
+        "Loads llama.cpp GGUF quantized weights (k-quants).",
+        "Consumes weights already quantized in llama.cpp's GGUF format — most often the "
+        "'k-quant' block schemes (Q4_K, Q5_K, …) that store small blocks with one or two shared "
+        "scales/minimums. vLLM dequantizes them at runtime; handy for reusing community GGUF "
+        "checkpoints.",
+    ),
+    "bitsandbytes": (
+        "On-the-fly 4-bit (NF4) / 8-bit weight quant, QLoRA-style.",
+        "Quantizes weights at load time. The 8-bit path uses vector-wise INT8 with separate "
+        "handling of activation outliers (LLM.int8()); the 4-bit path uses NF4, a normalized-"
+        "float code optimized for normally-distributed weights, plus double quantization of the "
+        "scales to save more memory. Popular for low-memory loading and QLoRA.",
+    ),
+    "compressed_tensors": (
+        "A container format describing per-tensor quant recipes.",
+        "Not a single algorithm but a schema (from the LLM-Compressor / neuralmagic toolchain) "
+        "that records how each tensor is quantized — W8A8 INT8 or FP8, INT4 weight-only, "
+        "structured sparsity, and so on. vLLM reads the recipe and dispatches the matching "
+        "kernel per layer.",
+    ),
+    "fbgemm_fp8": (
+        "FP8 weights via Meta's FBGEMM GEMM path.",
+        "Serves FP8-quantized weights through Meta's FBGEMM FP8 kernels, typically with per-"
+        "channel weight scales and dynamic per-token activation scales.",
+    ),
+    "modelopt": (
+        "Loads NVIDIA TensorRT Model Optimizer checkpoints.",
+        "Consumes models quantized by NVIDIA TensorRT Model Optimizer (FP8, or INT4 AWQ), "
+        "carrying TRT-MO's scales and recipe into vLLM's kernels.",
+    ),
+    "experts_int8": (
+        "INT8 weights for Mixture-of-Experts expert matrices.",
+        "Applies INT8 weight quantization specifically to the MoE expert matrices — where most "
+        "MoE parameters live — to cut memory while leaving the rest of the model unquantized.",
+    ),
+    "int8": (
+        "Generic INT8 weight (and optionally activation) quant.",
+        "Maps weights to 8-bit integers with a scale per tensor or channel; with W8A8 the "
+        "activations are quantized too. Simple and very hardware-friendly — larger than 4-bit "
+        "but typically near-lossless.",
+    ),
+    "tpu_int8": (
+        "INT8 quantization path specialized for TPU.",
+        "An INT8 weight-quantization path tuned for TPU hardware and the XLA compiler.",
+    ),
+    "quark": (
+        "Loads AMD Quark quantized checkpoints.",
+        "Consumes models produced by AMD's Quark quantization toolkit (FP8 / INT4 / …), "
+        "targeting ROCm and the MI-series GPUs.",
+    ),
+    "hqq": (
+        "Calibration-free low-bit quant via a half-quadratic solver.",
+        "Half-Quadratic Quantization fixes a per-group scale (from the weight range) and then "
+        "optimizes the zero-point by minimizing a robust, outlier-tolerant error with a half-"
+        "quadratic solver — no calibration data needed. It's fast to apply and holds up at low "
+        "bit-widths.",
+    ),
+    "aqlm": (
+        "Extreme 2-3 bit weights via additive vector quantization.",
+        "Additive Quantization of Language Models represents each group of weights as a sum of "
+        "vectors picked from small learned codebooks (vector quantization). This reaches 2-3 "
+        "bits per weight with surprisingly little accuracy loss, at the cost of a heavier decode "
+        "step.",
+    ),
+    "qqq": (
+        "W4A8: 4-bit weights, 8-bit activations, with accuracy-preserving smoothing.",
+        "Pairs 4-bit weights with 8-bit activations (W4A8). To recover the accuracy normally "
+        "lost when activations are quantized, QQQ uses adaptive smoothing of the activation "
+        "channels that carry large outliers plus Hessian-based weight compensation, without "
+        "retraining. It then ships specialized per-channel and per-group W4A8 GEMM kernels that "
+        "deliver the speedup over FP16.",
+    ),
+    "deepspeedfp": (
+        "Loads DeepSpeed FP-quantized weights.",
+        "Consumes DeepSpeed's floating-point-quantized weight format (e.g. FP6/FP8) and its "
+        "matching kernels.",
+    ),
+    "moe_wna16": (
+        "Weight-only N-bit × FP16 kernels for MoE layers.",
+        "WNA16 = weight N-bit, activation 16-bit. Specialized INT4/INT8 weight-only kernels for "
+        "Mixture-of-Experts layers, multiplying low-bit expert weights against FP16 activations.",
+    ),
+    "ipex_quant": (
+        "Intel IPEX quantization for CPU / XPU.",
+        "Routes quantization through the Intel Extension for PyTorch back-end for CPU and Intel "
+        "GPU (XPU) execution.",
+    ),
+    "neuron_quant": (
+        "Quantization for AWS Neuron (Trainium / Inferentia).",
+        "Provides the quantization path for AWS Neuron accelerators (Trainium / Inferentia).",
+    ),
+    "torchao": (
+        "Bridges PyTorch-native torchao quantization.",
+        "Lets vLLM consume models quantized with PyTorch's `torchao` library — int4/int8 weight-"
+        "only, fp8, and related schemes — reusing torchao's kernels.",
+    ),
+    "bitblas": (
+        "A mixed-precision GEMM kernel backend.",
+        "BitBLAS (from Microsoft) generates fast mixed-precision GEMMs; vLLM uses it as a kernel "
+        "backend to execute GPTQ/AWQ-style low-bit weights.",
+    ),
+    "auto_round": (
+        "Learns better low-bit rounding via sign-gradient descent.",
+        "AutoRound (Intel) treats each weight's round-up-or-down choice as a learnable parameter "
+        "and tunes it with a few hundred steps of sign-gradient descent against calibration "
+        "data, beating naive nearest rounding at low bit-widths (e.g. 4-bit).",
+    ),
+    "petit_nvfp4": (
+        "NVFP4 weights served on AMD GPUs via the Petit kernel.",
+        "Runs NVFP4 (4-bit float) weights on AMD Instinct GPUs (CDNA2/CDNA3, e.g. MI250/MI300) "
+        "that lack native FP4 hardware. The Petit kernel does a mixed-precision GEMM, "
+        "dequantizing the 4-bit weights to BF16/FP16 on the fly and multiplying against "
+        "BF16/FP16 activations — letting existing AMD GPUs serve FP4 checkpoints without native "
+        "FP4 tensor cores.",
+    ),
+    "rtn": (
+        "Round-to-nearest — the simple baseline.",
+        "The simplest scheme: divide by a scale and round each weight to the nearest "
+        "quantization level, with no calibration or error correction. Fast but the least "
+        "accurate — mostly a reference point for the smarter methods.",
+    ),
 }
+
+_QUANT_FALLBACK = (
+    "Quantization method.",
+    "No write-up yet — open the source to see how it works.",
+)
 
 
 def render_quantization_expander(db_path: Path, repo: str = "vllm-project/vllm") -> str:
-    """A collapsible <details> listing every quantization algorithm vLLM ships.
+    """A collapsible <details> explaining every quantization algorithm vLLM ships.
 
     Each entry is a real file under `vllm/model_executor/layers/quantization/`
-    (from `source_inventory`), with a short description, a source link pinned to
-    the discovered SHA, and 90-day PR activity. Returns '' if not loaded yet.
+    (from `source_inventory`). It renders as a nested expander: the summary shows
+    the method name + a one-line tagline, and expanding it reveals the principle
+    (how it works) plus a source link pinned to the discovered SHA and 90-day PR
+    activity. Returns '' if not loaded yet.
     """
     rows = load_inventory(db_path, kind="quantization")
     if not rows:
@@ -98,27 +266,27 @@ def render_quantization_expander(db_path: Path, repo: str = "vllm-project/vllm")
     items: list[str] = []
     for r in rows:
         name = r["name"]
-        desc = _QUANT_DESCRIPTIONS.get(
-            name.lower(), "Quantization method — open the source for details."
-        )
+        tagline, principle = _QUANT_INFO.get(name.lower(), _QUANT_FALLBACK)
         blob = _gh_blob_url(repo, r["source_path"], r.get("source_sha"))
         count = activity.get(r["source_path"], 0)
         act = f'<span class="q-act">{count} PRs/90d</span>' if count else ""
         items.append(
-            '<li class="q-item">'
-            f'<a class="q-name" href="{blob}" target="_blank" rel="noopener">'
-            f"<code>{escape(name)}</code></a>{act}"
-            f'<div class="q-desc">{escape(desc)}</div>'
-            "</li>"
+            '<details class="q-item">'
+            f"<summary><code>{escape(name)}</code> "
+            f'<span class="q-tag">{escape(tagline)}</span>{act}</summary>'
+            f'<p class="q-desc">{escape(principle)} '
+            f'<a class="q-src" href="{blob}" target="_blank" rel="noopener">'
+            "read the source &rarr;</a></p>"
+            "</details>"
         )
     return (
         '<details class="quant-expander">'
         '<summary>vLLM quantization algorithms '
         f'<span class="q-count">({len(rows)})</span></summary>'
-        '<p class="q-intro">Every method below is a real file in upstream vLLM '
-        "(click the name to read it). Descriptions are short operator notes, not "
-        "benchmarks.</p>"
-        f'<ul class="q-list">{"".join(items)}</ul>'
+        '<p class="q-intro">Every method below is a real file in upstream vLLM. '
+        "Click a method to read how it works; click &ldquo;read the source&rdquo; to "
+        "open the file. Notes are short explanations, not benchmarks.</p>"
+        f'<div class="q-list">{"".join(items)}</div>'
         "</details>"
     )
 
@@ -239,18 +407,23 @@ details.quant-expander > summary::before { content: "▸"; display: inline-block
 details.quant-expander[open] > summary::before { transform: rotate(90deg); }
 details.quant-expander[open] > summary { border-bottom: 1px solid #6663; }
 .quant-expander .q-count { font-weight: 400; opacity: .55; font-size: .85rem; }
-.quant-expander .q-intro { font-size: .82rem; opacity: .75; margin: .7rem .85rem 0;
-    max-width: 75ch; }
-.quant-expander .q-list { list-style: none; margin: .5rem 0 .3rem; padding: 0;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: .15rem .9rem; }
-.quant-expander .q-item { padding: .5rem .85rem; border-top: 1px solid #6662; }
-.quant-expander .q-name { text-decoration: none; }
-.quant-expander .q-name code { font-size: .85rem; padding: .05rem .35rem;
+.quant-expander .q-intro { font-size: .82rem; opacity: .75; margin: .7rem .85rem .2rem;
+    max-width: 80ch; }
+.quant-expander .q-list { margin: 0 0 .3rem; padding: 0; }
+/* Each algorithm is its own nested expander. */
+details.q-item { border-top: 1px solid #6662; }
+details.q-item > summary { cursor: pointer; padding: .5rem .85rem; list-style: none;
+    user-select: none; display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+details.q-item > summary::-webkit-details-marker { display: none; }
+details.q-item > summary::before { content: "+"; opacity: .5; font-weight: 700;
+    width: 1ch; display: inline-block; }
+details.q-item[open] > summary::before { content: "\2212"; }  /* minus */
+details.q-item > summary code { font-size: .85rem; padding: .05rem .35rem;
     border-radius: 4px; background: rgba(102,204,255,.12); border: 1px solid #6cf4; }
-.quant-expander .q-name:hover code { background: rgba(102,204,255,.22); }
-.quant-expander .q-act { font-size: .68rem; opacity: .6; margin-left: .5rem;
+.quant-expander .q-tag { font-size: .82rem; opacity: .82; }
+.quant-expander .q-act { font-size: .68rem; opacity: .55; margin-left: auto;
     white-space: nowrap; }
-.quant-expander .q-desc { font-size: .8rem; opacity: .82; margin-top: .25rem;
-    line-height: 1.4; }
+.quant-expander .q-desc { font-size: .82rem; opacity: .9; line-height: 1.5;
+    margin: 0 .85rem .7rem 2.35rem; max-width: 80ch; }
+.quant-expander .q-src { white-space: nowrap; }
 """

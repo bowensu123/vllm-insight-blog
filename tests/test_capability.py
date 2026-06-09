@@ -19,7 +19,7 @@ def _add_inventory(db, kind, name, path, sha=None):
         )
 
 
-def test_quant_expander_lists_algorithms_with_descriptions(db):
+def test_quant_expander_explains_algorithms(db):
     _add_inventory(db, "quantization", "fp8",
                    "vllm/model_executor/layers/quantization/fp8.py", "abc1234deadbeef")
     _add_inventory(db, "quantization", "some_new_thing",
@@ -28,8 +28,13 @@ def test_quant_expander_lists_algorithms_with_descriptions(db):
     assert html.startswith('<details class="quant-expander">')
     assert "(2)" in html                              # count
     assert "<code>fp8</code>" in html
-    assert "8-bit float (E4M3)" in html               # known description
-    assert "open the source for details" in html      # unknown -> generic fallback
+    # tagline (summary) + principle (expanded body) for a known method
+    assert "E4M3" in html                             # tagline
+    assert "tensor cores run FP8 matmuls natively" in html  # principle text
+    # each algorithm is its own nested expander
+    assert '<details class="q-item">' in html
+    # unknown method -> generic fallback principle, still rendered
+    assert "No write-up yet" in html
     # source link pinned to the discovered SHA
     assert "blob/abc1234deadbeef/" in html
 
