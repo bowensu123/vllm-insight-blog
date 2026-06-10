@@ -29,8 +29,10 @@ from .analyzer.queries import (
 )
 from .capability import (
     CAPABILITY_CSS,
+    render_attention_expander,
     render_capability_matrix,
     render_quantization_expander,
+    render_spec_decode_expander,
 )
 from .db import connect
 from .hero import build_upgrade_hero, build_status_strip, _backfill_progress
@@ -1299,7 +1301,12 @@ def _make_sections(db_path: Path, docs_dir: Path, prs: pd.DataFrame,
         empty_state=empty_state("Not loaded yet", "Will fill in once data is loaded."),
     ), (
         render_quantization_expander(db_path, repo)
-        + render_capability_matrix(db_path, repo, exclude_kinds={"quantization"})
+        + render_attention_expander(db_path, repo)
+        + render_spec_decode_expander(db_path, repo)
+        + render_capability_matrix(
+            db_path, repo,
+            exclude_kinds={"quantization", "attention", "spec_decode"},
+        )
     )))
 
     # ── 4. Supported models ──────────────────────────────────────────────────

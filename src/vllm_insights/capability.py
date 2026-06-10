@@ -243,22 +243,144 @@ _QUANT_INFO: dict[str, tuple[str, str]] = {
     ),
 }
 
-_QUANT_FALLBACK = (
-    "Quantization method.",
+_GENERIC_FALLBACK = (
+    "",
     "No write-up yet — open the source to see how it works.",
 )
 
 
-def render_quantization_expander(db_path: Path, repo: str = "vllm-project/vllm") -> str:
-    """A collapsible <details> explaining every quantization algorithm vLLM ships.
+# Attention backends: files under vllm/v1/attention/backends/ (or legacy
+# vllm/attention/backends/). Keyed by file stem.
+_ATTENTION_INFO: dict[str, tuple[str, str]] = {
+    "flash_attn": (
+        "FlashAttention — exact attention without the full score matrix.",
+        "Computes attention exactly but never materializes the N×N score matrix. It tiles "
+        "Q/K/V into blocks that fit in on-chip SRAM and uses the online-softmax trick to "
+        "accumulate the result block by block, so memory is linear in sequence length and the "
+        "kernel is IO-optimal. vLLM uses FlashAttention-2/3 kernels on supported NVIDIA GPUs.",
+    ),
+    "flashinfer": (
+        "FlashInfer — attention kernels tuned for LLM serving.",
+        "A library of attention kernels built for inference: paged KV cache, ragged/variable-"
+        "length batches, and both prefill and decode. Often the fastest path for an FP8 KV cache "
+        "and for grouped-query / MLA attention on recent NVIDIA GPUs.",
+    ),
+    "triton_attn": (
+        "FlashAttention-style kernel written in Triton.",
+        "A FlashAttention-style fused kernel implemented in Triton, so it runs across GPU "
+        "architectures/vendors where a hand-tuned CUDA kernel isn't available — trading some "
+        "peak speed for portability.",
+    ),
+    "xformers": (
+        "Memory-efficient attention via Meta's xFormers.",
+        "Uses xFormers' memory-efficient (FlashAttention-style) fused attention. A broadly "
+        "compatible backend for GPUs and cases the native FlashAttention kernels don't cover.",
+    ),
+    "torch_sdpa": (
+        "PyTorch scaled_dot_product_attention.",
+        "Routes attention through PyTorch's built-in scaled_dot_product_attention, which itself "
+        "dispatches to the best available implementation (FlashAttention / memory-efficient / "
+        "math). Used on CPU and as a portable fallback.",
+    ),
+    "flex_attention": (
+        "PyTorch FlexAttention — compiled custom masks/bias.",
+        "Built on PyTorch FlexAttention, which compiles a user-defined score-modification "
+        "function (masking, bias, ALiBi, sliding window, …) into a single fused attention "
+        "kernel — flexible attention patterns without hand-writing CUDA.",
+    ),
+    "rocm_flash_attn": (
+        "FlashAttention for AMD GPUs (ROCm).",
+        "The FlashAttention path for AMD Instinct GPUs via ROCm kernels.",
+    ),
+    "rocm_aiter_fa": (
+        "AMD AITER FlashAttention (ROCm).",
+        "FlashAttention on AMD GPUs through the AITER kernel library — the tuned MI-series path.",
+    ),
+    "pallas": (
+        "TPU attention written in Pallas.",
+        "Attention implemented in Pallas, the JAX/XLA kernel language, for TPU execution.",
+    ),
+    "cpu_attn": (
+        "CPU attention backend.",
+        "The attention implementation used on CPU back-ends.",
+    ),
+    "tree_attn": (
+        "Tree attention for speculative verification.",
+        "Verifies multiple speculative token branches at once by laying them out as a tree and "
+        "applying a custom attention mask, so each candidate only attends to its own ancestors — "
+        "used to check several drafted continuations in a single pass.",
+    ),
+    "flashmla": (
+        "FlashAttention kernels for DeepSeek MLA.",
+        "Kernels specialized for Multi-head Latent Attention (MLA), which compresses the KV "
+        "cache into a low-rank latent; serves DeepSeek-style low-rank-KV attention efficiently "
+        "on supported NVIDIA GPUs.",
+    ),
+    "mla": (
+        "Multi-head Latent Attention (DeepSeek).",
+        "MLA stores the per-token KV as a small low-rank latent vector instead of full K and V, "
+        "shrinking the KV cache; the attention math is refactored to operate on that latent. "
+        "These backends implement the MLA-specific kernels (e.g. for DeepSeek-V2/V3).",
+    ),
+}
 
-    Each entry is a real file under `vllm/model_executor/layers/quantization/`
-    (from `source_inventory`). It renders as a nested expander: the summary shows
-    the method name + a one-line tagline, and expanding it reveals the principle
-    (how it works) plus a source link pinned to the discovered SHA and 90-day PR
-    activity. Returns '' if not loaded yet.
+
+# Speculative-decoding methods: files under vllm/v1/spec_decode/ (or legacy
+# vllm/spec_decode/). Keyed by file stem.
+_SPEC_DECODE_INFO: dict[str, tuple[str, str]] = {
+    "ngram": (
+        "N-gram / prompt-lookup speculation — no draft model.",
+        "Proposes the next few tokens by matching the recent context against earlier text in the "
+        "same prompt/output (a prompt-lookup table) and copying what followed last time. The "
+        "target model verifies the guesses in one pass. Free to run and very effective when "
+        "output echoes the input (RAG, code, summarization).",
+    ),
+    "eagle": (
+        "EAGLE — feature-level draft head.",
+        "A small draft head that autoregresses at the hidden-feature level rather than over "
+        "tokens, predicting the target model's next features to propose several tokens cheaply; "
+        "the target then verifies them in a single forward pass. (EAGLE-2/3 add dynamic draft "
+        "trees and feature fusion.)",
+    ),
+    "eagle3": (
+        "EAGLE-3 — feature-fusion input, direct token drafting.",
+        "An EAGLE variant that fuses low-, mid-, and high-level features from the target model "
+        "as the drafter's input and (unlike EAGLE/EAGLE-2) drafts tokens directly rather than "
+        "predicting features, which raises the acceptance rate of the proposed tokens.",
+    ),
+    "medusa": (
+        "Medusa — extra decoding heads + tree verification.",
+        "Adds several lightweight decoding heads on top of the frozen base model, each predicting "
+        "a token a few positions ahead. Their candidate combinations are assembled into a tree "
+        "and verified together in one forward pass via tree attention.",
+    ),
+    "mlp_speculator": (
+        "MLP speculator — predicts several future tokens.",
+        "A small MLP (IBM's speculator) that, from the current hidden state, predicts a handful "
+        "of future tokens to draft candidates for the target model to verify.",
+    ),
+}
+
+
+_EXPANDER_INTRO = (
+    "Every item below is a real file in upstream vLLM. Click one to read how it works; "
+    "click &ldquo;read the source&rdquo; to open the file. Notes are short explanations, "
+    "not benchmarks."
+)
+
+
+def _render_info_expander(
+    db_path: Path,
+    *,
+    kind: str,
+    title: str,
+    info_map: dict[str, tuple[str, str]],
+    repo: str,
+) -> str:
+    """Shared renderer: a collapsible <details> whose items each expand to a
+    'how it works' explanation. Returns '' if the inventory for `kind` is empty.
     """
-    rows = load_inventory(db_path, kind="quantization")
+    rows = load_inventory(db_path, kind=kind)
     if not rows:
         return ""
     activity = pr_activity_for_inventory(db_path, days=90)
@@ -266,28 +388,50 @@ def render_quantization_expander(db_path: Path, repo: str = "vllm-project/vllm")
     items: list[str] = []
     for r in rows:
         name = r["name"]
-        tagline, principle = _QUANT_INFO.get(name.lower(), _QUANT_FALLBACK)
+        tagline, principle = info_map.get(name.lower(), _GENERIC_FALLBACK)
         blob = _gh_blob_url(repo, r["source_path"], r.get("source_sha"))
         count = activity.get(r["source_path"], 0)
         act = f'<span class="q-act">{count} PRs/90d</span>' if count else ""
+        tag_html = f'<span class="q-tag">{escape(tagline)}</span>' if tagline else ""
         items.append(
             '<details class="q-item">'
-            f"<summary><code>{escape(name)}</code> "
-            f'<span class="q-tag">{escape(tagline)}</span>{act}</summary>'
+            f"<summary><code>{escape(name)}</code> {tag_html}{act}</summary>"
             f'<p class="q-desc">{escape(principle)} '
             f'<a class="q-src" href="{blob}" target="_blank" rel="noopener">'
             "read the source &rarr;</a></p>"
             "</details>"
         )
     return (
-        '<details class="quant-expander">'
-        '<summary>vLLM quantization algorithms '
+        '<details class="info-expander">'
+        f"<summary>{escape(title)} "
         f'<span class="q-count">({len(rows)})</span></summary>'
-        '<p class="q-intro">Every method below is a real file in upstream vLLM. '
-        "Click a method to read how it works; click &ldquo;read the source&rdquo; to "
-        "open the file. Notes are short explanations, not benchmarks.</p>"
+        f'<p class="q-intro">{_EXPANDER_INTRO}</p>'
         f'<div class="q-list">{"".join(items)}</div>'
         "</details>"
+    )
+
+
+def render_quantization_expander(db_path: Path, repo: str = "vllm-project/vllm") -> str:
+    """Collapsible explainer for the quantization algorithms vLLM ships."""
+    return _render_info_expander(
+        db_path, kind="quantization", title="vLLM quantization algorithms",
+        info_map=_QUANT_INFO, repo=repo,
+    )
+
+
+def render_attention_expander(db_path: Path, repo: str = "vllm-project/vllm") -> str:
+    """Collapsible explainer for the attention backends vLLM ships."""
+    return _render_info_expander(
+        db_path, kind="attention", title="vLLM attention backends",
+        info_map=_ATTENTION_INFO, repo=repo,
+    )
+
+
+def render_spec_decode_expander(db_path: Path, repo: str = "vllm-project/vllm") -> str:
+    """Collapsible explainer for the speculative-decoding methods vLLM ships."""
+    return _render_info_expander(
+        db_path, kind="spec_decode", title="vLLM speculative decoding",
+        info_map=_SPEC_DECODE_INFO, repo=repo,
     )
 
 
@@ -397,19 +541,19 @@ table.cap-table td.deep a:hover { opacity: 1; }
 .act-cold  { color: #888; }
 
 /* Quantization algorithms expander */
-details.quant-expander { margin: .6rem 0 1.4rem; border: 1px solid #6663;
+details.info-expander { margin: .6rem 0 1.4rem; border: 1px solid #6663;
     border-radius: 8px; background: var(--bg-2, #fff1); overflow: hidden; }
-details.quant-expander > summary { cursor: pointer; padding: .6rem .85rem;
+details.info-expander > summary { cursor: pointer; padding: .6rem .85rem;
     font-weight: 600; font-size: .95rem; list-style: none; user-select: none; }
-details.quant-expander > summary::-webkit-details-marker { display: none; }
-details.quant-expander > summary::before { content: "▸"; display: inline-block;
+details.info-expander > summary::-webkit-details-marker { display: none; }
+details.info-expander > summary::before { content: "▸"; display: inline-block;
     margin-right: .5rem; opacity: .6; transition: transform .15s ease; }
-details.quant-expander[open] > summary::before { transform: rotate(90deg); }
-details.quant-expander[open] > summary { border-bottom: 1px solid #6663; }
-.quant-expander .q-count { font-weight: 400; opacity: .55; font-size: .85rem; }
-.quant-expander .q-intro { font-size: .82rem; opacity: .75; margin: .7rem .85rem .2rem;
+details.info-expander[open] > summary::before { transform: rotate(90deg); }
+details.info-expander[open] > summary { border-bottom: 1px solid #6663; }
+.info-expander .q-count { font-weight: 400; opacity: .55; font-size: .85rem; }
+.info-expander .q-intro { font-size: .82rem; opacity: .75; margin: .7rem .85rem .2rem;
     max-width: 80ch; }
-.quant-expander .q-list { margin: 0 0 .3rem; padding: 0; }
+.info-expander .q-list { margin: 0 0 .3rem; padding: 0; }
 /* Each algorithm is its own nested expander. */
 details.q-item { border-top: 1px solid #6662; }
 details.q-item > summary { cursor: pointer; padding: .5rem .85rem; list-style: none;
@@ -420,10 +564,10 @@ details.q-item > summary::before { content: "+"; opacity: .5; font-weight: 700;
 details.q-item[open] > summary::before { content: "\2212"; }  /* minus */
 details.q-item > summary code { font-size: .85rem; padding: .05rem .35rem;
     border-radius: 4px; background: rgba(102,204,255,.12); border: 1px solid #6cf4; }
-.quant-expander .q-tag { font-size: .82rem; opacity: .82; }
-.quant-expander .q-act { font-size: .68rem; opacity: .55; margin-left: auto;
+.info-expander .q-tag { font-size: .82rem; opacity: .82; }
+.info-expander .q-act { font-size: .68rem; opacity: .55; margin-left: auto;
     white-space: nowrap; }
-.quant-expander .q-desc { font-size: .82rem; opacity: .9; line-height: 1.5;
+.info-expander .q-desc { font-size: .82rem; opacity: .9; line-height: 1.5;
     margin: 0 .85rem .7rem 2.35rem; max-width: 80ch; }
-.quant-expander .q-src { white-space: nowrap; }
+.info-expander .q-src { white-space: nowrap; }
 """

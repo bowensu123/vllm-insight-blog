@@ -5,8 +5,10 @@ import datetime as dt
 import sqlite3
 
 from vllm_insights.capability import (
+    render_attention_expander,
     render_capability_matrix,
     render_quantization_expander,
+    render_spec_decode_expander,
 )
 
 
@@ -25,7 +27,7 @@ def test_quant_expander_explains_algorithms(db):
     _add_inventory(db, "quantization", "some_new_thing",
                    "vllm/model_executor/layers/quantization/some_new_thing.py")
     html = render_quantization_expander(db)
-    assert html.startswith('<details class="quant-expander">')
+    assert html.startswith('<details class="info-expander">')
     assert "(2)" in html                              # count
     assert "<code>fp8</code>" in html
     # tagline (summary) + principle (expanded body) for a known method
@@ -37,6 +39,32 @@ def test_quant_expander_explains_algorithms(db):
     assert "No write-up yet" in html
     # source link pinned to the discovered SHA
     assert "blob/abc1234deadbeef/" in html
+
+
+def test_attention_expander_explains_backends(db):
+    _add_inventory(db, "attention", "flash_attn",
+                   "vllm/v1/attention/backends/flash_attn.py")
+    _add_inventory(db, "attention", "flashinfer",
+                   "vllm/v1/attention/backends/flashinfer.py")
+    html = render_attention_expander(db)
+    assert "vLLM attention backends" in html
+    assert "<code>flash_attn</code>" in html
+    assert "online-softmax" in html             # FlashAttention principle
+    assert "paged KV cache" in html             # FlashInfer principle
+
+
+def test_spec_decode_expander_explains_methods(db):
+    _add_inventory(db, "spec_decode", "ngram", "vllm/v1/spec_decode/ngram.py")
+    _add_inventory(db, "spec_decode", "eagle", "vllm/v1/spec_decode/eagle.py")
+    html = render_spec_decode_expander(db)
+    assert "vLLM speculative decoding" in html
+    assert "prompt-lookup" in html              # ngram principle
+    assert "feature level" in html              # EAGLE principle
+
+
+def test_expanders_empty_when_not_loaded(db):
+    assert render_attention_expander(db) == ""
+    assert render_spec_decode_expander(db) == ""
 
 
 def test_quant_expander_empty_when_not_loaded(db):
