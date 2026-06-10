@@ -380,8 +380,8 @@ is shipping — supported models, capability surface, release notes, community
 signals — kept up to date roughly every hour.</p>
 
 <h2 id="freshness">How fresh is the data?</h2>
-<p>Refreshed roughly hourly. Worst-case staleness from upstream event to this
-page is about one hour.</p>
+<p>Refreshed weekly. Worst-case staleness from an upstream event to this page is
+about one week.</p>
 
 <h2 id="subscribe">Following</h2>
 <p>Subscribe via the <a href="feed.xml">Atom feed</a>, or watch
@@ -432,7 +432,7 @@ def build_about_page(
 </script>"""
     base_site = _site_base_url(site_owner)
     page_url = f"{base_site}/about.html"
-    desc = "A live view of what vLLM is shipping. Updated hourly."
+    desc = "A live view of what vLLM is shipping. Updated weekly."
     html = f"""<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -481,9 +481,9 @@ def build_sitemap(docs_dir: Path, *, site_owner: str = "bowensu123") -> Path:
     base_site = _site_base_url(site_owner)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     urls: list[tuple[str, str, str]] = [
-        (f"{base_site}/", today, "hourly"),
+        (f"{base_site}/", today, "weekly"),
         (f"{base_site}/about.html", today, "monthly"),
-        (f"{base_site}/features/", today, "daily"),
+        (f"{base_site}/features/", today, "weekly"),
         (f"{base_site}/weekly/", today, "weekly"),
     ]
     feat_dir = docs_dir / "features"

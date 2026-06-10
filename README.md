@@ -4,9 +4,9 @@ Automated insights for [vllm-project/vllm](https://github.com/vllm-project/vllm)
 release dynamics, PR flow, technical-area trends — distilled into a **weekly,
 LLM-written technical digest** that explains what shipped and why it matters.
 
-The pipeline runs on GitHub Actions every 3 hours (sync + publish) and emails a
-teaching-oriented weekly digest to your mailbox via private SMTP, at most once
-every two days.
+The pipeline runs on GitHub Actions once a week (sync → analyze → digest → build →
+publish) and emails the teaching-oriented weekly digest to your mailbox via
+private SMTP.
 
 ## Setup
 
@@ -66,13 +66,13 @@ Auto-selected by env var (`summarize._detect_backend`):
 
 ## Automation (GitHub Actions)
 
-- **`daily-sync.yml`** — every 3h: sync → analyze → digest → build → publish to
-  Pages. At most once every two days it emails the digest **privately via SMTP**
+- **`daily-sync.yml`** — runs weekly (Monday 08:00 UTC): sync → analyze → digest →
+  build → publish to Pages, then emails the digest **privately via SMTP**
   (`vllm-insights email-digest`) straight to `MAIL_TO` — nothing is posted
-  publicly and no repo watchers are notified. The send gate is a date sentinel
-  stored inside the SQLite DB. The history is backed up to a `data` branch and
-  restored on cache miss. A failing digest alerts you privately (email if SMTP is
-  set, otherwise just a workflow log warning — never a public issue).
+  publicly and no repo watchers are notified. Change the day/time via the `cron`
+  line. The history is backed up to a `data` branch and restored on cache miss.
+  A failing digest alerts you privately (email if SMTP is set, otherwise just a
+  workflow log warning — never a public issue).
 - **`ci.yml`** — runs `pytest` on every push/PR; lint is advisory.
 
 Outbound data and the guarantee that nothing notifies third parties are documented

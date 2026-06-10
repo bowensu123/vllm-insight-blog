@@ -1655,7 +1655,7 @@ def build_index(db_path: Path, docs_dir: Path, repo: str) -> Path:
     </div>
   </div>
   <footer class="foot">
-    <div>vllm-insights &middot; refreshed hourly &middot;
+    <div>vllm-insights &middot; refreshed weekly &middot;
       tracking <a href="{repo_url}">{escape(repo)}</a></div>
     <div>
       <a href="about.html">About</a> &middot;

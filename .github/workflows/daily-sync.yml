@@ -1,8 +1,8 @@
-name: Daily sync & publish
+name: Weekly sync & publish
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # every 3 hours, top of the hour UTC
+    - cron: "0 8 * * 1"    # weekly — every Monday 08:00 UTC (change the day/time here)
   workflow_dispatch:
     inputs:
       full:
@@ -144,9 +144,11 @@ jobs:
       #   SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, MAIL_TO   (required)
       #   SMTP_PORT (default 465), SMTP_SECURITY (ssl|starttls|plain), MAIL_FROM
       # Gated to at most once every MIN_DAYS days via a sentinel inside the DB.
-      - name: Email weekly digest via SMTP (every 2 days)
+      # With a weekly cron, MIN_DAYS=6 means the scheduled run always emails while
+      # a manual same-week re-trigger won't double-send.
+      - name: Email weekly digest via SMTP
         env:
-          MIN_DAYS: "2"
+          MIN_DAYS: "6"
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_SECURITY: ${{ secrets.SMTP_SECURITY }}
