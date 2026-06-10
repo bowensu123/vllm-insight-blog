@@ -25,10 +25,12 @@ from .source_scan import load_inventory, kinds_in_order
 
 
 def _site_base_url(repo_owner: str) -> str:
-    """The site is published to <owner>.github.io/<project>. We hardcode the
-    project slug here because the repo name and the published path may differ
-    on a fork."""
-    return f"https://{repo_owner}.github.io/vllm-insights"
+    """The site is published to <owner>.github.io/<project>. Defaults to the
+    blog repo's Pages path; override with the SITE_PROJECT env var if the repo
+    is named differently."""
+    import os
+    project = os.getenv("SITE_PROJECT", "vllm-insight-blog").strip() or "vllm-insight-blog"
+    return f"https://{repo_owner}.github.io/{project}"
 
 
 def build_feed(db_path: Path, docs_dir: Path, site_owner: str = "bowensu123") -> Path:
@@ -385,12 +387,12 @@ about one week.</p>
 
 <h2 id="subscribe">Following</h2>
 <p>Subscribe via the <a href="feed.xml">Atom feed</a>, or watch
-<a href="https://github.com/bowensu123/vllm-insights" target="_blank" rel="noopener">the
+<a href="https://github.com/bowensu123/vllm-insight-blog" target="_blank" rel="noopener">the
 source repo</a> on GitHub. No analytics, no cookies, no login.</p>
 
 <h2 id="bugs">If something looks wrong</h2>
 <p>File an issue on
-<a href="https://github.com/bowensu123/vllm-insights/issues" target="_blank" rel="noopener">the
+<a href="https://github.com/bowensu123/vllm-insight-blog/issues" target="_blank" rel="noopener">the
 issue tracker</a>.</p>
 """
 

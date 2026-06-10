@@ -6,6 +6,7 @@ shell primitives and design tokens. The data each section renders is
 unchanged; this module only wires the data into the new chrome.
 """
 import json
+import os
 import re
 from datetime import datetime, timezone
 from html import escape
@@ -1624,7 +1625,9 @@ def build_index(db_path: Path, docs_dir: Path, repo: str) -> Path:
     og_title = "vLLM Insights"
     og_desc = ("A live view of what vLLM is shipping — supported models, "
                "capability surface, release verdicts, community signals.")
-    og_url = "https://bowensu123.github.io/vllm-insights/"
+    og_url = os.getenv(
+        "SITE_BASE_URL", "https://bowensu123.github.io/vllm-insight-blog"
+    ).rstrip("/") + "/"
 
     body = f"""<!DOCTYPE html>
 <html lang="en"><head>
