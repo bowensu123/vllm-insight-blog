@@ -7,6 +7,7 @@ import sqlite3
 from vllm_insights.capability import (
     render_attention_expander,
     render_capability_matrix,
+    render_params_expander,
     render_quantization_expander,
     render_spec_decode_expander,
 )
@@ -65,6 +66,18 @@ def test_spec_decode_expander_explains_methods(db):
 def test_expanders_empty_when_not_loaded(db):
     assert render_attention_expander(db) == ""
     assert render_spec_decode_expander(db) == ""
+
+
+def test_params_expander_is_static_and_grouped():
+    # Not driven by the DB — always renders the curated parameter reference.
+    html = render_params_expander()
+    assert "vLLM key parameters" in html
+    assert '<h4 class="q-group">Parallelism &amp; distributed</h4>' in html
+    assert "<code>--tensor-parallel-size</code>" in html
+    assert "<code>--gpu-memory-utilization</code>" in html
+    assert "shard each layer across N GPUs" in html      # tagline
+    assert "becomes KV cache" in html                    # explanation
+    assert "docs.vllm.ai" in html                        # docs link
 
 
 def test_quant_expander_empty_when_not_loaded(db):

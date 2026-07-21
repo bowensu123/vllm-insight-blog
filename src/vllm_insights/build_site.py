@@ -32,6 +32,7 @@ from .capability import (
     CAPABILITY_CSS,
     render_attention_expander,
     render_capability_matrix,
+    render_params_expander,
     render_quantization_expander,
     render_spec_decode_expander,
 )
@@ -1304,6 +1305,7 @@ def _make_sections(db_path: Path, docs_dir: Path, prs: pd.DataFrame,
         render_quantization_expander(db_path, repo)
         + render_attention_expander(db_path, repo)
         + render_spec_decode_expander(db_path, repo)
+        + render_params_expander(repo)
         + render_capability_matrix(
             db_path, repo,
             exclude_kinds={"quantization", "attention", "spec_decode"},

@@ -435,6 +435,183 @@ def render_spec_decode_expander(db_path: Path, repo: str = "vllm-project/vllm") 
     )
 
 
+_PARAM_DOCS_URL = "https://docs.vllm.ai/en/latest/serving/engine_args.html"
+
+# The engine/serving flags operators most often tune, grouped. Static curated
+# reference (not derived from source_inventory) — (flag, tagline, explanation).
+_PARAM_GROUPS: list[tuple[str, list[tuple[str, str, str]]]] = [
+    ("Model & precision", [
+        ("--model",
+         "Which model to serve.",
+         "A Hugging Face repo id (e.g. meta-llama/Llama-3.1-8B-Instruct) or a local path. "
+         "Almost everything else — architecture, tokenizer, default context length — is loaded "
+         "or derived from it."),
+        ("--dtype",
+         "Compute/weight precision.",
+         "auto (default) picks the model's native precision — usually bfloat16 for modern "
+         "models — or you can force float16/bfloat16/float32. Prefer bfloat16 on Ampere+ for "
+         "numerical stability; float16 can overflow on some models."),
+        ("--max-model-len",
+         "Max context length (prompt + output).",
+         "The longest total sequence the server accepts. Defaults to the model's trained "
+         "maximum. Lowering it shrinks the KV-cache footprint so you fit more concurrent "
+         "requests; raising it beyond the training length needs RoPE scaling and can hurt "
+         "quality."),
+        ("--trust-remote-code",
+         "Allow the repo's custom model code.",
+         "Executes the model repo's own modeling_*.py. Required for architectures not yet in "
+         "transformers/vLLM, but it runs third-party Python — only enable for repos you trust."),
+        ("--tokenizer-mode",
+         "Which tokenizer implementation.",
+         "auto (default) picks the fast HF tokenizer; other values include slow (force the "
+         "pure-Python HF tokenizer), mistral (the mistral_common tokenizer, needed for some "
+         "Mistral models), custom, and model-specific modes — the set isn't exhaustive."),
+        ("--seed",
+         "Fix the RNG seed.",
+         "Makes sampling reproducible across runs for a given request."),
+    ]),
+    ("Parallelism & distributed", [
+        ("--tensor-parallel-size",
+         "TP — shard each layer across N GPUs.",
+         "Splits every layer's weights and attention heads across N GPUs that all work on each "
+         "token together. The main way to fit a model too large for one GPU and to speed up "
+         "each request; it wants fast intra-node links (NVLink). Set it to how many GPUs one "
+         "replica should span."),
+        ("--pipeline-parallel-size",
+         "PP — split layers into sequential stages.",
+         "Divides the model's layers into N stages on different GPUs/nodes; tokens flow stage "
+         "to stage. Tolerates slower inter-node links than TP, so it's how you scale across "
+         "nodes or fit very large models — at the cost of some pipeline latency."),
+        ("--data-parallel-size",
+         "DP — replicate the model for throughput.",
+         "Runs N independent replicas to multiply throughput; for MoE models it also underpins "
+         "expert parallelism across replicas. Total GPUs used = DP × TP × PP."),
+        ("--enable-expert-parallel",
+         "EP — distribute MoE experts.",
+         "For Mixture-of-Experts models, spread the experts across GPUs (expert parallelism) "
+         "instead of replicating them, cutting per-GPU memory for the large expert weights."),
+        ("--distributed-executor-backend",
+         "How workers are launched.",
+         "mp (multiprocessing, single node) or ray (multi-node clusters). Auto-selected; force "
+         "ray when a replica spans multiple nodes."),
+    ]),
+    ("GPU memory & KV cache", [
+        ("--gpu-memory-utilization",
+         "Fraction of GPU memory vLLM may use (default 0.92).",
+         "After the weights load, the remaining share of each GPU's memory becomes KV cache, so "
+         "higher means more concurrent tokens/requests — but too high risks OOM from activation "
+         "spikes. Lower it if you share the GPU with other processes."),
+        ("--kv-cache-dtype",
+         "Quantize the KV cache.",
+         "auto (= model dtype) or fp8. fp8 roughly halves KV-cache memory, so you fit about 2× "
+         "the tokens / concurrency for a small accuracy cost, given hardware/kernel support."),
+        ("--cpu-offload-gb",
+         "Offload weights to CPU RAM.",
+         "Keeps this many GiB of model weights in CPU memory and streams them in as needed — "
+         "lets a model that doesn't fit in VRAM run, at a large speed penalty."),
+        ("--block-size",
+         "KV-cache page size in tokens.",
+         "The KV cache is paged into blocks of this many tokens. Rarely changed; it interacts "
+         "with prefix caching and the attention kernel."),
+    ]),
+    ("Batching & scheduling", [
+        ("--max-num-seqs",
+         "Max concurrent sequences per batch.",
+         "The concurrency cap — how many requests can be in a decode batch at once. Higher "
+         "raises throughput until you run out of KV cache or compute."),
+        ("--max-num-batched-tokens",
+         "Token budget per engine step.",
+         "How many tokens one iteration may process. Larger values push prefill throughput "
+         "(more prompt tokens per step) but can raise inter-token latency for decodes; tuned "
+         "together with chunked prefill."),
+        ("--enable-chunked-prefill",
+         "Interleave long prefills with decodes.",
+         "Splits a long prompt's prefill into token-budget-sized chunks and interleaves them "
+         "with ongoing decodes, so one huge prompt doesn't stall every other request. Improves "
+         "latency fairness under mixed load (on by default for many V1 configs)."),
+        ("--enable-prefix-caching",
+         "Reuse KV for shared prompt prefixes.",
+         "Caches the KV of common prompt prefixes (system prompts, few-shot examples, shared "
+         "document context) and reuses it across requests, skipping recomputation. A big win "
+         "for RAG and agent workloads that repeat prefixes (on by default in vLLM V1; disable "
+         "with --no-enable-prefix-caching)."),
+        ("--scheduling-policy",
+         "Order of waiting requests.",
+         "fcfs (first-come-first-served, default) or priority, which honors a per-request "
+         "priority when choosing what to run next."),
+    ]),
+    ("Performance & features", [
+        ("--quantization",
+         "Weight-quantization method.",
+         "Load the model with a quantization scheme (awq, gptq, fp8, compressed-tensors, …); "
+         "often auto-detected from the checkpoint. Shrinks the weights and can speed up serving "
+         "— see the quantization expander above for how each works."),
+        ("--enforce-eager",
+         "Disable CUDA graphs (eager mode).",
+         "Turns off CUDA graph capture. Saves some memory and speeds startup, but steady-state "
+         "decode is slower — mostly for debugging or memory-tight setups. Off by default."),
+        ("--speculative-config",
+         "Enable speculative decoding.",
+         "Configures a draft method (n-gram, EAGLE, a small draft model, …) that proposes "
+         "several tokens per step which the target model verifies in one pass, cutting latency "
+         "when the acceptance rate is high — see the speculative-decoding expander above."),
+        ("--compilation-config",
+         "torch.compile / fusion level.",
+         "Controls how aggressively vLLM compiles and fuses the model (e.g. via torch.compile). "
+         "Higher levels can speed up steady-state throughput at the cost of longer startup."),
+    ]),
+    ("Serving & API", [
+        ("--served-model-name",
+         "The name clients pass as `model`.",
+         "The alias clients send in the OpenAI-style API's `model` field (defaults to the "
+         "--model path). Set a short, friendly name."),
+        ("--api-key",
+         "Require an API key.",
+         "Demand this key as a Bearer token on every request to the server."),
+        ("--enable-auto-tool-choice / --tool-call-parser",
+         "OpenAI-style tool calling.",
+         "Turn on function/tool calling and select the parser matching the model's tool-call "
+         "format (e.g. hermes, llama3_json, mistral)."),
+        ("--chat-template",
+         "Override the chat template.",
+         "Supply a Jinja chat template to format messages when the model's built-in one is "
+         "missing or wrong."),
+        ("--enable-lora / --max-lora-rank / --max-loras",
+         "Serve LoRA adapters.",
+         "Serve LoRA adapters on top of the base model: enable LoRA, cap the adapter rank, and "
+         "set how many adapters can be active in a batch at once."),
+    ]),
+]
+
+
+def render_params_expander(repo: str = "vllm-project/vllm") -> str:
+    """A collapsible <details> explaining the vLLM engine/serving flags operators
+    most often tune. Static curated reference (grouped), always rendered."""
+    total = sum(len(params) for _, params in _PARAM_GROUPS)
+    parts = [
+        '<details class="info-expander">',
+        f"<summary>vLLM key parameters "
+        f'<span class="q-count">({total})</span></summary>',
+        '<p class="q-intro">The engine / serving flags you most often tune when running '
+        "<code>vllm serve</code>. Click one to read what it does and when to change it. "
+        f'Full reference in the <a href="{_PARAM_DOCS_URL}" target="_blank" rel="noopener">'
+        "vLLM docs</a>.</p>",
+        '<div class="q-list">',
+    ]
+    for group_label, params in _PARAM_GROUPS:
+        parts.append(f'<h4 class="q-group">{escape(group_label)}</h4>')
+        for name, tagline, principle in params:
+            parts.append(
+                '<details class="q-item">'
+                f"<summary><code>{escape(name)}</code> "
+                f'<span class="q-tag">{escape(tagline)}</span></summary>'
+                f'<p class="q-desc">{escape(principle)}</p>'
+                "</details>"
+            )
+    parts.append("</div></details>")
+    return "".join(parts)
+
+
 def render_capability_matrix(
     db_path: Path,
     repo: str = "vllm-project/vllm",
@@ -570,4 +747,7 @@ details.q-item > summary code { font-size: .85rem; padding: .05rem .35rem;
 .info-expander .q-desc { font-size: .82rem; opacity: .9; line-height: 1.5;
     margin: 0 .85rem .7rem 2.35rem; max-width: 80ch; }
 .info-expander .q-src { white-space: nowrap; }
+.info-expander .q-group { font-size: .7rem; text-transform: uppercase;
+    letter-spacing: .06em; opacity: .6; font-weight: 700; margin: .9rem .85rem .1rem; }
+.info-expander .q-group:first-child { margin-top: .4rem; }
 """
